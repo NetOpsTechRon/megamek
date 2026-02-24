@@ -127,10 +127,12 @@ import megamek.common.weapons.defensivePods.ISMPod;
 import megamek.common.weapons.flamers.clan.CLERFlamer;
 import megamek.common.weapons.flamers.clan.CLFlamer;
 import megamek.common.weapons.flamers.clan.CLHeavyFlamer;
+import megamek.common.weapons.flamers.clan.CLXFlamer;
 import megamek.common.weapons.flamers.innerSphere.ISERFlamer;
 import megamek.common.weapons.flamers.innerSphere.ISFlamer;
 import megamek.common.weapons.flamers.innerSphere.ISHeavyFlamer;
 import megamek.common.weapons.flamers.innerSphere.ISVehicleFlamer;
+import megamek.common.weapons.flamers.innerSphere.ISXFlamer;
 import megamek.common.weapons.gaussRifles.clan.CLAPGaussRifle;
 import megamek.common.weapons.gaussRifles.clan.CLGaussRifle;
 import megamek.common.weapons.gaussRifles.clan.CLHAG20;
@@ -327,12 +329,16 @@ import megamek.common.weapons.mgs.clan.CLLightMG;
 import megamek.common.weapons.mgs.clan.CLLightMGA;
 import megamek.common.weapons.mgs.clan.CLMG;
 import megamek.common.weapons.mgs.clan.CLMGA;
+import megamek.common.weapons.mgs.clan.CLXMG;
+import megamek.common.weapons.mgs.clan.CLXMGA;
 import megamek.common.weapons.mgs.innerSphere.ISHeavyMG;
 import megamek.common.weapons.mgs.innerSphere.ISHeavyMGA;
 import megamek.common.weapons.mgs.innerSphere.ISLightMG;
 import megamek.common.weapons.mgs.innerSphere.ISLightMGA;
 import megamek.common.weapons.mgs.innerSphere.ISMG;
 import megamek.common.weapons.mgs.innerSphere.ISMGA;
+import megamek.common.weapons.mgs.innerSphere.ISXMG;
+import megamek.common.weapons.mgs.innerSphere.ISXMGA;
 import megamek.common.weapons.missiles.clan.CLATM12;
 import megamek.common.weapons.missiles.clan.CLATM3;
 import megamek.common.weapons.missiles.clan.CLATM6;
@@ -1368,6 +1374,8 @@ public class WeaponType extends EquipmentType {
         EquipmentType.addType(new ISHeavyFlamer());
         EquipmentType.addType(new ISERFlamer());
         EquipmentType.addType(new CLERFlamer());
+        EquipmentType.addType(new CLXFlamer());
+        EquipmentType.addType(new ISXFlamer());
 
         // Autocannons
         EquipmentType.addType(new ISAC2());
@@ -1451,12 +1459,16 @@ public class WeaponType extends EquipmentType {
         EquipmentType.addType(new ISMGA());
         EquipmentType.addType(new ISLightMGA());
         EquipmentType.addType(new ISHeavyMGA());
+        EquipmentType.addType(new ISXMG());
+        EquipmentType.addType(new ISXMGA());
         EquipmentType.addType(new CLMG());
         EquipmentType.addType(new CLLightMG());
         EquipmentType.addType(new CLHeavyMG());
         EquipmentType.addType(new CLMGA());
         EquipmentType.addType(new CLLightMGA());
         EquipmentType.addType(new CLHeavyMGA());
+        EquipmentType.addType(new CLXMG());
+        EquipmentType.addType(new CLXMGA());
 
         // LRMs
         EquipmentType.addType(new ISLRM5());

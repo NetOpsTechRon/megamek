@@ -32,40 +32,30 @@
  * affiliated with Microsoft.
  */
 
-package megamek.common.weapons.mgs.innerSphere;
-
-import java.io.Serial;
-
-import megamek.common.enums.AvailabilityValue;
-import megamek.common.enums.TechBase;
-import megamek.common.enums.TechRating;
-import megamek.common.equipment.WeaponType;
-import megamek.common.weapons.mgs.MGWeapon;
+package megamek.common.weapons.mgs.clan;
 
 /**
- * @author Sebastian Brocks
+ * @author Andrew Hunter
+ * @since Oct 20, 2004
  */
-public class ISMG extends MGWeapon {
-    @Serial
-    private static final long serialVersionUID = -4431163118750064849L;
+public class CLXMG extends megamek.common.weapons.mgs.MGWeapon {
+    @java.io.Serial
+    private static final long serialVersionUID = 2557645305248678454L;
 
-    public ISMG() {
+    public CLXMG() {
         super();
-
-        name = "Machine Gun";
-        setInternalName(this.name);
-        addLookupName("IS Machine Gun");
-        addLookupName("ISMachine Gun");
-        addLookupName("ISMG");
+        name = "Machine Gun (X)";
+        setInternalName("CLXMG");
+        addLookupName("Clan Machine Gun (X)");
         heat = 0;
-        damage = 2;
-        infDamageClass = WeaponType.WEAPON_BURST_2D6;
+        damage = 3;
+        infDamageClass = megamek.common.equipment.WeaponType.WEAPON_BURST_6D6;
         rackSize = 2;
-        shortRange = 1;
-        mediumRange = 2;
-        longRange = 3;
-        extremeRange = 4;
-        tonnage = 0.5;
+        shortRange = 3;
+        mediumRange = 6;
+        longRange = 9;
+        extremeRange = 12;
+        tonnage = 0.25;
         criticalSlots = 1;
         bv = 5;
         cost = 5000;
@@ -73,14 +63,14 @@ public class ISMG extends MGWeapon {
         maxRange = RANGE_SHORT;
         atClass = CLASS_POINT_DEFENSE;
         rulesRefs = "228, TM";
-        techAdvancement.setTechBase(TechBase.ALL)
-              .setIntroLevel(true)
+        techAdvancement.setTechBase(megamek.common.enums.TechBase.CLAN)
+              .setIntroLevel(false)
               .setUnofficial(false)
-              .setTechRating(TechRating.B)
-              .setAvailability(AvailabilityValue.A, AvailabilityValue.A, AvailabilityValue.B, AvailabilityValue.A)
-              .setISAdvancement(DATE_PS, DATE_PS, DATE_PS, DATE_NONE, DATE_NONE)
-              .setISApproximate(false, false, false, false, false)
-              .setClanAdvancement(DATE_PS, DATE_PS, DATE_PS, 2826, DATE_NONE)
-              .setClanApproximate(false, false, false, false, false);
+              .setTechRating(megamek.common.enums.TechRating.C)
+              .setAvailability(megamek.common.enums.AvailabilityValue.X, megamek.common.enums.AvailabilityValue.B, megamek.common.enums.AvailabilityValue.B, megamek.common.enums.AvailabilityValue.A)
+              .setClanAdvancement(2821, 2825, 2830, DATE_NONE, DATE_NONE)
+              .setClanApproximate(true, false, false, false, false)
+              .setPrototypeFactions(megamek.common.enums.Faction.CSF)
+              .setProductionFactions(megamek.common.enums.Faction.CSF);
     }
 }

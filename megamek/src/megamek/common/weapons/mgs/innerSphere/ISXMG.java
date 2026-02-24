@@ -45,26 +45,26 @@ import megamek.common.weapons.mgs.MGWeapon;
 /**
  * @author Sebastian Brocks
  */
-public class ISMG extends MGWeapon {
+public class ISXMG extends MGWeapon {
     @Serial
-    private static final long serialVersionUID = -4431163118750064849L;
+    private static final long serialVersionUID = -4432163118750064849L;
 
-    public ISMG() {
+    public ISXMG() {
         super();
 
-        name = "Machine Gun";
+        name = "Machine Gun (X)";
         setInternalName(this.name);
-        addLookupName("IS Machine Gun");
-        addLookupName("ISMachine Gun");
-        addLookupName("ISMG");
+        addLookupName("IS Machine Gun (X)");
+        addLookupName("ISMachine Gun (X)");
+        addLookupName("ISXMG");
         heat = 0;
-        damage = 2;
-        infDamageClass = WeaponType.WEAPON_BURST_2D6;
+        damage = 3;
+        infDamageClass = WeaponType.WEAPON_BURST_6D6;
         rackSize = 2;
-        shortRange = 1;
-        mediumRange = 2;
-        longRange = 3;
-        extremeRange = 4;
+        shortRange = 3;
+        mediumRange = 6;
+        longRange = 9;
+        extremeRange = 12;
         tonnage = 0.5;
         criticalSlots = 1;
         bv = 5;

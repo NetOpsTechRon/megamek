@@ -56,7 +56,6 @@ public class ISFlamer extends FlamerWeapon {
         setInternalName(this.name);
         addLookupName("IS Flamer");
         addLookupName("ISFlamer");
-        sortingName = "Flamer C";
         heat = 3;
         damage = 2;
         infDamageClass = WeaponType.WEAPON_BURST_4D6;

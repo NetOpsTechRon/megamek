@@ -32,55 +32,53 @@
  * affiliated with Microsoft.
  */
 
-package megamek.common.weapons.mgs.innerSphere;
+package megamek.common.weapons.flamers.clan;
 
 import java.io.Serial;
 
 import megamek.common.enums.AvailabilityValue;
+import megamek.common.enums.Faction;
 import megamek.common.enums.TechBase;
 import megamek.common.enums.TechRating;
 import megamek.common.equipment.WeaponType;
-import megamek.common.weapons.mgs.MGWeapon;
+import megamek.common.weapons.flamers.FlamerWeapon;
 
 /**
- * @author Sebastian Brocks
+ * @author Andrew Hunter
+ * @since Sep 24, 2004
  */
-public class ISMG extends MGWeapon {
+public class CLXFlamer extends FlamerWeapon {
     @Serial
-    private static final long serialVersionUID = -4431163118750064849L;
+    private static final long serialVersionUID = 8782412971175525221L;
 
-    public ISMG() {
+    public CLXFlamer() {
         super();
-
-        name = "Machine Gun";
-        setInternalName(this.name);
-        addLookupName("IS Machine Gun");
-        addLookupName("ISMachine Gun");
-        addLookupName("ISMG");
-        heat = 0;
-        damage = 2;
-        infDamageClass = WeaponType.WEAPON_BURST_2D6;
-        rackSize = 2;
-        shortRange = 1;
-        mediumRange = 2;
-        longRange = 3;
-        extremeRange = 4;
-        tonnage = 0.5;
-        criticalSlots = 1;
-        bv = 5;
-        cost = 5000;
-        shortAV = 2;
-        maxRange = RANGE_SHORT;
-        atClass = CLASS_POINT_DEFENSE;
-        rulesRefs = "228, TM";
-        techAdvancement.setTechBase(TechBase.ALL)
-              .setIntroLevel(true)
+        this.name = "Flamer (X)";
+        this.setInternalName("CLXFlamer");
+        this.addLookupName("Clan Flamer (X)");
+        this.heat = 2;
+        this.damage = 4;
+        this.infDamageClass = WeaponType.WEAPON_BURST_6D6;
+        this.shortRange = 3;
+        this.mediumRange = 6;
+        this.longRange = 9;
+        this.extremeRange = 12;
+        this.tonnage = 0.5;
+        this.criticalSlots = 1;
+        this.bv = 6;
+        this.cost = 7500;
+        this.shortAV = 2;
+        this.maxRange = RANGE_SHORT;
+        this.atClass = CLASS_POINT_DEFENSE;
+        rulesRefs = "218, TM";
+        techAdvancement.setTechBase(TechBase.CLAN)
+              .setIntroLevel(false)
               .setUnofficial(false)
-              .setTechRating(TechRating.B)
-              .setAvailability(AvailabilityValue.A, AvailabilityValue.A, AvailabilityValue.B, AvailabilityValue.A)
-              .setISAdvancement(DATE_PS, DATE_PS, DATE_PS, DATE_NONE, DATE_NONE)
-              .setISApproximate(false, false, false, false, false)
-              .setClanAdvancement(DATE_PS, DATE_PS, DATE_PS, 2826, DATE_NONE)
-              .setClanApproximate(false, false, false, false, false);
+              .setTechRating(TechRating.C)
+              .setAvailability(AvailabilityValue.X, AvailabilityValue.C, AvailabilityValue.A, AvailabilityValue.A)
+              .setClanAdvancement(2820, 2827, 2828, DATE_NONE, DATE_NONE)
+              .setClanApproximate(false, false, false, false, false)
+              .setPrototypeFactions(Faction.CFM)
+              .setProductionFactions(Faction.CFM);
     }
 }
