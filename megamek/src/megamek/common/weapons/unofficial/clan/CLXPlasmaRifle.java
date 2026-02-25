@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004, 2005 Ben Mazur (bmazur@sev.org)
+ * Copyright (C) 2005 Ben Mazur (bmazur@sev.org)
  * Copyright (C) 2007-2025 The MegaMek Team. All Rights Reserved.
  *
  * This file is part of MegaMek.
@@ -32,54 +32,58 @@
  * affiliated with Microsoft.
  */
 
-package megamek.common.weapons.flamers.clan;
+package megamek.common.weapons.unofficial.clan;
 
 import java.io.Serial;
 
+import megamek.common.alphaStrike.AlphaStrikeElement;
 import megamek.common.enums.AvailabilityValue;
 import megamek.common.enums.Faction;
 import megamek.common.enums.TechBase;
 import megamek.common.enums.TechRating;
-import megamek.common.equipment.WeaponType;
-import megamek.common.weapons.flamers.FlamerWeapon;
+import megamek.common.weapons.unofficial.PlasmaMFUKWeapon;
 
 /**
- * @author Andrew Hunter
- * @since Sep 24, 2004
+ * @author Sebastian Brocks
+ * @since Sep 13, 2004
  */
-public class CLXFlamer extends FlamerWeapon {
+public class CLXPlasmaRifle extends PlasmaMFUKWeapon {
     @Serial
-    private static final long serialVersionUID = 8782412971175525221L;
+    private static final long serialVersionUID = 1758452784568087479L;
 
-    public CLXFlamer() {
+    public CLXPlasmaRifle() {
         super();
-        this.name = "Flamer (X)";
-        this.setInternalName("CLXFlamer");
-        this.addLookupName("Clan Flamer (X)");
-        flags = flags.or(WeaponType.F_X_FLAMER);
-        this.heat = 2;
-        this.damage = 2;
-        this.infDamageClass = WeaponType.WEAPON_BURST_6D6;
-        this.shortRange = 3;
-        this.mediumRange = 6;
-        this.longRange = 9;
-        this.extremeRange = 12;
-        this.tonnage = 0.5;
-        this.criticalSlots = 1;
-        this.bv = 6;
-        this.cost = 7500;
-        this.shortAV = 2;
-        this.maxRange = RANGE_SHORT;
-        this.atClass = CLASS_POINT_DEFENSE;
-        rulesRefs = "218, TM";
+        name = "Plasma Rifle (X)";
+        setInternalName("CLXPlasmaRifle");
+        heat = 10;
+        damage = 10;
+        rackSize = 1;
+        minimumRange = 0;
+        shortRange = 6;
+        mediumRange = 12;
+        longRange = 18;
+        extremeRange = 24;
+        tonnage = 6.0;
+        criticalSlots = 1;
+        bv = 300;
+        cost = 300000;
+        shortAV = 10;
+        medAV = 10;
+        maxRange = RANGE_MED;
+        rulesRefs = "Unofficial";
         techAdvancement.setTechBase(TechBase.CLAN)
               .setIntroLevel(false)
               .setUnofficial(false)
-              .setTechRating(TechRating.C)
-              .setAvailability(AvailabilityValue.X, AvailabilityValue.C, AvailabilityValue.A, AvailabilityValue.A)
-              .setClanAdvancement(2820, 2827, 2828, DATE_NONE, DATE_NONE)
-              .setClanApproximate(false, false, false, false, false)
-              .setPrototypeFactions(Faction.CFM)
-              .setProductionFactions(Faction.CFM);
+              .setTechRating(TechRating.E)
+              .setAvailability(AvailabilityValue.X, AvailabilityValue.X, AvailabilityValue.E, AvailabilityValue.D)
+              .setClanAdvancement(3045, 3048, 3050, DATE_NONE, DATE_NONE)
+              .setClanApproximate(true, false, false, false, false)
+              .setPrototypeFactions(Faction.CSF)
+              .setProductionFactions(Faction.CSF);
+    }
+
+    @Override
+    public int getAlphaStrikeHeatDamage(int rangeband) {
+        return (rangeband <= AlphaStrikeElement.RANGE_BAND_MEDIUM) ? 3 : 0;
     }
 }

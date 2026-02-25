@@ -60,12 +60,12 @@ public class ISAC10i extends ACWeapon {
         heat = 3;
         damage = 10;
         rackSize = 10;
-        minimumRange = 1;
+        minimumRange = 0;
         shortRange = 7;
         mediumRange = 15;
         longRange = 20;
         extremeRange = 28;
-        tonnage = 12.0;
+        tonnage = 11.0;
         criticalSlots = 7;
         bv = 167;
         cost = 410000;

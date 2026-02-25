@@ -48,7 +48,7 @@ public class CLXMG extends megamek.common.weapons.mgs.MGWeapon {
         setInternalName("CLXMG");
         addLookupName("Clan Machine Gun (X)");
         heat = 0;
-        damage = 3;
+        damage = 2;
         infDamageClass = megamek.common.equipment.WeaponType.WEAPON_BURST_6D6;
         rackSize = 2;
         shortRange = 3;

@@ -85,6 +85,7 @@ public enum WeaponTypeFlag implements EquipmentFlag {
     F_LASER,
     F_LARGE_MISSILE, // Thunderbolt and similar large missiles, for use with AMS resolution
     F_ER_FLAMER, // ER flamers do half damage in heat mode
+    F_X_FLAMER, // X flamers do double damage in heat mode
     F_FLAMER,
     F_M_POD,
     F_MEK_MORTAR,

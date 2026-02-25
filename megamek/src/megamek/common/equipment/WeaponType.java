@@ -392,6 +392,7 @@ import megamek.common.weapons.other.clan.CLFireExtinguisher;
 import megamek.common.weapons.other.clan.CLFluidGun;
 import megamek.common.weapons.other.clan.CLFussilade;
 import megamek.common.weapons.other.clan.CLLaserAMS;
+import megamek.common.weapons.other.clan.CLXLaserAMS;
 import megamek.common.weapons.other.clan.CLNarc;
 import megamek.common.weapons.other.clan.CLNarcIOS;
 import megamek.common.weapons.other.clan.CLNarcOS;
@@ -491,10 +492,12 @@ import megamek.common.weapons.tag.CLLightTAG;
 import megamek.common.weapons.tag.CLTAG;
 import megamek.common.weapons.tag.ISTAG;
 import megamek.common.weapons.unofficial.clan.CLPlasmaRifle;
+import megamek.common.weapons.unofficial.clan.CLXPlasmaRifle;
 import megamek.common.weapons.unofficial.clan.CLRAC10;
 import megamek.common.weapons.unofficial.clan.CLRAC20;
 import megamek.common.weapons.unofficial.innerSphere.ISLaserAMSTHB;
 import megamek.common.weapons.unofficial.innerSphere.ISRailGun;
+import megamek.common.weapons.unofficial.innerSphere.ISXPlasmaRifle;
 import megamek.common.weapons.unofficial.innerSphere.ac.ISAC10i;
 import megamek.common.weapons.unofficial.innerSphere.ac.ISAC15;
 import megamek.common.weapons.unofficial.innerSphere.ac.ISGAC2;
@@ -657,6 +660,8 @@ public class WeaponType extends EquipmentType {
     public static final WeaponTypeFlag F_DOUBLE_ONE_SHOT = WeaponTypeFlag.F_DOUBLE_ONE_SHOT;
     // ER flamers do half damage in heat mode
     public static final WeaponTypeFlag F_ER_FLAMER = WeaponTypeFlag.F_ER_FLAMER;
+    // X flamers do double damage in heat mode
+    public static final WeaponTypeFlag F_X_FLAMER = WeaponTypeFlag.F_X_FLAMER;
     /** Missile weapon that can be linked to an Artemis fire control system */
     public static final WeaponTypeFlag F_ARTEMIS_COMPATIBLE = WeaponTypeFlag.F_ARTEMIS_COMPATIBLE;
 
@@ -1712,8 +1717,10 @@ public class WeaponType extends EquipmentType {
         EquipmentType.addType(new ISAMS());
         EquipmentType.addType(new ISLaserAMS());
         EquipmentType.addType(new ISLaserAMSTHB());
+        EquipmentType.addType(new ISXLaserAMS());
         EquipmentType.addType(new CLAMS());
         EquipmentType.addType(new CLLaserAMS());
+        EquipmentType.addType(new CLXLaserAMS());
 
         // TAGs
         EquipmentType.addType(new ISTAG());
@@ -1746,6 +1753,8 @@ public class WeaponType extends EquipmentType {
 
         // MFUK weapons
         EquipmentType.addType(new CLPlasmaRifle());
+        EquipmentType.addType(new CLXPlasmaRifle());
+        EquipmentType.addType(new ISXPlasmaRifle());
         EquipmentType.addType(new CLRAC2());
         EquipmentType.addType(new CLRAC5());
         EquipmentType.addType(new CLRAC10());

@@ -67,7 +67,7 @@ public class CLXMGA extends AmmoWeapon {
         addLookupName("Clan Machine Gun Array (X)");
         setInternalName("CLXMGA");
         heat = 0;
-        damage = 3;
+        damage = 2;
         infDamageClass = WeaponType.WEAPON_BURST_6D6;
         rackSize = 2;
         ammoType = AmmoType.AmmoTypeEnum.MG;

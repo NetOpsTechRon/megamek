@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004, 2005 Ben Mazur (bmazur@sev.org)
+ * Copyright (C) 2005 Ben Mazur (bmazur@sev.org)
  * Copyright (C) 2007-2025 The MegaMek Team. All Rights Reserved.
  *
  * This file is part of MegaMek.
@@ -32,55 +32,53 @@
  * affiliated with Microsoft.
  */
 
-package megamek.common.weapons.mgs.innerSphere;
-
-import java.io.Serial;
+package megamek.common.weapons.unofficial.innerSphere;
 
 import megamek.common.enums.AvailabilityValue;
 import megamek.common.enums.TechBase;
 import megamek.common.enums.TechRating;
-import megamek.common.equipment.WeaponType;
-import megamek.common.weapons.mgs.MGWeapon;
 
 /**
  * @author Sebastian Brocks
+ * @since Sep 13, 2004
  */
-public class ISXMG extends MGWeapon {
-    @Serial
-    private static final long serialVersionUID = -4432163118750064849L;
+public class ISXPlasmaRifle extends megamek.common.weapons.unofficial.PlasmaMFUKWeapon {
+    @java.io.Serial
+    private static final long serialVersionUID = 1758453784566087479L;
 
-    public ISXMG() {
+    public ISXPlasmaRifle() {
         super();
-
-        name = "Machine Gun (X)";
-        setInternalName(this.name);
-        addLookupName("IS Machine Gun (X)");
-        addLookupName("ISMachine Gun (X)");
-        addLookupName("ISXMG");
-        heat = 0;
-        damage = 2;
-        infDamageClass = WeaponType.WEAPON_BURST_6D6;
-        rackSize = 2;
-        shortRange = 3;
-        mediumRange = 6;
-        longRange = 9;
-        extremeRange = 12;
-        tonnage = 0.5;
+        name = "Plasma Rifle (X)";
+        setInternalName("ISXPlasmaRifle");
+        heat = 10;
+        damage = 10;
+        rackSize = 1;
+        minimumRange = 0;
+        shortRange = 5;
+        mediumRange = 10;
+        longRange = 15;
+        extremeRange = 20;
+        tonnage = 6.0;
         criticalSlots = 1;
-        bv = 5;
-        cost = 5000;
-        shortAV = 2;
-        maxRange = RANGE_SHORT;
-        atClass = CLASS_POINT_DEFENSE;
-        rulesRefs = "228, TM";
-        techAdvancement.setTechBase(TechBase.ALL)
-              .setIntroLevel(true)
+        bv = 240;
+        cost = 260000;
+        shortAV = 10;
+        medAV = 10;
+        maxRange = RANGE_MED;
+        rulesRefs = "Unofficial";
+        techAdvancement.setTechBase(TechBase.IS)
+              .setIntroLevel(false)
               .setUnofficial(false)
-              .setTechRating(TechRating.B)
-              .setAvailability(AvailabilityValue.A, AvailabilityValue.A, AvailabilityValue.B, AvailabilityValue.A)
-              .setISAdvancement(DATE_PS, DATE_PS, DATE_PS, DATE_NONE, DATE_NONE)
-              .setISApproximate(false, false, false, false, false)
-              .setClanAdvancement(DATE_PS, DATE_PS, DATE_PS, 2826, DATE_NONE)
-              .setClanApproximate(false, false, false, false, false);
+              .setTechRating(TechRating.E)
+              .setAvailability(AvailabilityValue.X, AvailabilityValue.X, AvailabilityValue.E, AvailabilityValue.D)
+              .setISAdvancement(3045, 3048, 3050, DATE_NONE, DATE_NONE)
+              .setISApproximate(true, false, false, false, false)
+              .setPrototypeFactions(megamek.common.enums.Faction.FS)
+              .setProductionFactions(megamek.common.enums.Faction.FS);
+    }
+
+    @Override
+    public int getAlphaStrikeHeatDamage(int rangeband) {
+        return (rangeband <= megamek.common.alphaStrike.AlphaStrikeElement.RANGE_BAND_MEDIUM) ? 3 : 0;
     }
 }

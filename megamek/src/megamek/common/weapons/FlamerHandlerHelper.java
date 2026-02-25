@@ -63,6 +63,11 @@ public class FlamerHandlerHelper {
             heatDamage = Math.max(1, heatDamage / 2);
         }
 
+        // X flamers do more heat damage
+        if (weaponType.hasFlag(WeaponType.F_X_FLAMER)) {
+            heatDamage = Math.max(20, heatDamage * 2);
+        }
+
         boolean heatDamageReducedByArmor = false;
         int actualDamage = heatDamage;
         boolean playtestThree = false;

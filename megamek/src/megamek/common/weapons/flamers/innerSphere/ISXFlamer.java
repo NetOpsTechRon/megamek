@@ -34,6 +34,8 @@
 
 package megamek.common.weapons.flamers.innerSphere;
 
+import megamek.common.equipment.WeaponType;
+
 /**
  * @author Andrew Hunter
  * @since Sep 24, 2004
@@ -48,8 +50,9 @@ public class ISXFlamer extends megamek.common.weapons.flamers.FlamerWeapon {
         setInternalName(this.name);
         addLookupName("IS Flamer (X)");
         addLookupName("ISXFlamer");
+        flags = flags.or(WeaponType.F_X_FLAMER);
         heat = 2;
-        damage = 4;
+        damage = 2;
         infDamageClass = megamek.common.equipment.WeaponType.WEAPON_BURST_6D6;
         shortRange = 3;
         mediumRange = 6;

@@ -37,17 +37,22 @@ package megamek.common.weapons.handlers.plasma;
 import java.io.Serial;
 import java.util.Vector;
 
+import megamek.common.RangeType;
 import megamek.common.Report;
 import megamek.common.ToHitData;
 import megamek.common.actions.WeaponAttackAction;
+import megamek.common.battleArmor.BattleArmor;
+import megamek.common.board.Coords;
+import megamek.common.compute.Compute;
 import megamek.common.equipment.ArmorType;
 import megamek.common.equipment.EquipmentType;
 import megamek.common.game.Game;
 import megamek.common.loaders.EntityLoadingException;
+import megamek.common.options.OptionsConstants;
 import megamek.common.rolls.TargetRoll;
 import megamek.common.units.Entity;
 import megamek.common.units.IBuilding;
-import megamek.common.units.Mek;
+import megamek.common.units.Infantry;
 import megamek.common.weapons.handlers.EnergyWeaponHandler;
 import megamek.server.totalWarfare.TWGameManager;
 
@@ -61,58 +66,139 @@ public class PlasmaMFUKWeaponHandler extends EnergyWeaponHandler {
     }
 
     @Override
-    protected void handleEntityDamage(Entity entityTarget, Vector<Report> vPhaseReport,
-          IBuilding bldg, int hits, int nCluster, int bldgAbsorbs) {
-        if (entityTarget instanceof Mek) {
-            if (!bSalvo) {
-                // hits
-                Report r = new Report(3390);
-                r.subject = subjectId;
-                vPhaseReport.addElement(r);
+    protected void handleEntityDamage(Entity entityTarget, Vector<Report> vPhaseReport, IBuilding bldg, int hits,
+          int nCluster, int bldgAbsorbs) {
+        if (game.getOptions().booleanOption(OptionsConstants.PLAYTEST_3)) {
+            if (hit != null) {
+                hit.setHeatWeapon(true);
             }
-            super.handleEntityDamage(entityTarget, vPhaseReport, bldg, hits, nCluster, bldgAbsorbs);
-
-            if (missed) {
-                return;
-            }
-
-            Report r = new Report(3400);
-            r.subject = subjectId;
-            r.indent(2);
-            if ((entityTarget.getArmor(hit) > 0)
-                  && ((entityTarget.getArmorType(hit.getLocation()) == EquipmentType.T_ARMOR_HEAT_DISSIPATING)
-                  || (entityTarget.getArmorType(hit.getLocation()) == EquipmentType.T_ARMOR_REFLECTIVE))) {
-                entityTarget.heatFromExternal += 2;
-                r.add(2);
-                r.choose(true);
-                r.messageId = 3406;
-                r.add(5);
-                r.add(ArmorType.forEntity(entityTarget, hit.getLocation()).getName());
-            } else {
-                entityTarget.heatFromExternal += 5;
-                r.add(5);
-                r.choose(true);
-            }
-            vPhaseReport.addElement(r);
-        } else {
-            super.handleEntityDamage(entityTarget, vPhaseReport, bldg, hits, nCluster, bldgAbsorbs);
         }
+        super.handleEntityDamage(entityTarget, vPhaseReport, bldg, hits, nCluster, bldgAbsorbs);
+        if (!missed && entityTarget.tracksHeat()) {
+            Report report = new Report(3400);
+            report.subject = subjectId;
+            report.indent(2);
+            int extraHeat = 0;
+            // if this is a fighter squadron, we need to account for the number of weapons should default to one for
+            // non-squadrons
+            for (int i = 0; i < numWeaponsHit; i++) {
+                extraHeat += Compute.d6(2);
+            }
+
+            if (entityTarget.getArmor(hit) > 0
+                  &&
+                  (entityTarget.getArmorType(hit.getLocation()) == EquipmentType.T_ARMOR_REFLECTIVE)
+                  && !game.getOptions().booleanOption(OptionsConstants.PLAYTEST_3)) {
+                // PLAYTEST3 do not halve for reflective
+                entityTarget.heatFromExternal += Math.max(1, extraHeat / 2);
+                report.add(Math.max(1, extraHeat / 2));
+                report.choose(true);
+                report.messageId = 3406;
+                report.add(extraHeat);
+                report.add(ArmorType.forEntity(entityTarget, hit.getLocation()).getName());
+            } else if (entityTarget.getArmor(hit) > 0 &&
+                  (entityTarget.getArmorType(hit.getLocation()) == EquipmentType.T_ARMOR_HEAT_DISSIPATING)) {
+                if (game.getOptions().booleanOption(OptionsConstants.PLAYTEST_3)) {
+                    // PLAYTEST3 no heat from plasma
+                    extraHeat = 0;
+                }
+                entityTarget.heatFromExternal += extraHeat / 2;
+                report.add(extraHeat / 2);
+                report.choose(true);
+                report.messageId = 3406;
+                report.add(extraHeat);
+                report.add(ArmorType.forEntity(entityTarget, hit.getLocation()).getName());
+            } else {
+                entityTarget.heatFromExternal += extraHeat;
+                report.add(extraHeat);
+                report.choose(true);
+            }
+            vPhaseReport.addElement(report);
+        }
+    }
+
+    @Override
+    protected int calcDamagePerHit() {
+        if (target.tracksHeat()) {
+            int toReturn = 10;
+            toReturn = applyGlancingBlowModifier(toReturn, false);
+            if (game.getOptions().booleanOption(OptionsConstants.ADVANCED_COMBAT_TAC_OPS_RANGE) &&
+                  (nRange > weaponType.getRanges(weapon)[RangeType.RANGE_LONG])) {
+                toReturn -= 1;
+            }
+            if (game.getOptions().booleanOption(OptionsConstants.ADVANCED_COMBAT_TAC_OPS_LOS_RANGE) &&
+                  (nRange > weaponType.getRanges(weapon)[RangeType.RANGE_EXTREME])) {
+                toReturn = (int) Math.floor(toReturn / 2.0);
+            }
+            return toReturn;
+        }
+        return 1;
+    }
+
+    @Override
+    protected int calculateNumCluster() {
+        if (target.tracksHeat()) {
+            bSalvo = false;
+            return 1;
+        }
+
+        int toReturn = 5;
+
+        if (target.isConventionalInfantry()) {
+            toReturn = Compute.d6(3);
+        }
+
+        bSalvo = true;
+        // pain-shunted infantry gets half-damage
+        if ((target instanceof Infantry) && ((Entity) target).hasAbility(OptionsConstants.MD_PAIN_SHUNT)) {
+            toReturn = Math.max(toReturn / 2, 1);
+        }
+
+        return toReturn;
+    }
+
+    @Override
+    protected int calcHits(Vector<Report> vPhaseReport) {
+        int toReturn;
+
+        // against meks, 1 hit with 10 damage, plus heat
+        if (target.tracksHeat()) {
+            toReturn = 1;
+            // otherwise, 10+3d6 damage but fire-resistant BA armor gets no damage from heat.
+            //
+        } else {
+            if ((target instanceof BattleArmor) && ((BattleArmor) target).isFireResistant()) {
+                toReturn = 10;
+            } else {
+                toReturn = 10 + Compute.d6(3);
+            }
+            toReturn = applyGlancingBlowModifier(toReturn, false);
+        }
+        return toReturn;
     }
 
     @Override
     protected void handleIgnitionDamage(Vector<Report> vPhaseReport, IBuilding bldg, int hits) {
         if (!bSalvo) {
             // hits!
-            Report r = new Report(2270);
-            r.subject = subjectId;
-            r.newlines = 0;
-            vPhaseReport.addElement(r);
+            Report report = new Report(2270);
+            report.subject = subjectId;
+            report.newlines = 0;
+            vPhaseReport.addElement(report);
         }
-        TargetRoll tn = new TargetRoll(weaponType.getFireTN(), weaponType.getName());
-        if (tn.getValue() != TargetRoll.IMPOSSIBLE) {
+
+        TargetRoll targetRoll = new TargetRoll(weaponType.getFireTN(), weaponType.getName());
+        if (targetRoll.getValue() != TargetRoll.IMPOSSIBLE) {
             Report.addNewline(vPhaseReport);
-            gameManager.tryIgniteHex(target.getPosition(), target.getBoardId(), subjectId, true, false,
-                  tn, true, -1, vPhaseReport);
+            gameManager.tryIgniteHex(target.getPosition(),
+                  target.getBoardId(),
+                  subjectId,
+                  true,
+                  false,
+                  targetRoll,
+                  true,
+                  -1,
+                  vPhaseReport);
         }
     }
 
@@ -120,27 +206,34 @@ public class PlasmaMFUKWeaponHandler extends EnergyWeaponHandler {
     protected void handleClearDamage(Vector<Report> vPhaseReport, IBuilding bldg, int nDamage) {
         if (!bSalvo) {
             // hits!
-            Report r = new Report(2270);
-            r.subject = subjectId;
-            vPhaseReport.addElement(r);
+            Report report = new Report(2270);
+            report.subject = subjectId;
+            vPhaseReport.addElement(report);
         }
-        // report that damage was "applied" to terrain
-        Report r = new Report(3385);
-        r.indent(2);
-        r.subject = subjectId;
-        r.add(nDamage);
-        vPhaseReport.addElement(r);
 
-        // Any clear attempt can result in accidental ignition, even
-        // weapons that can't normally start fires. that's weird.
-        // Buildings can't be accidentally ignited.
-        // TODO : change this for TacOps - now you roll another 2d6 first and on a 5 or less
-        // TODO : you do a normal ignition as though for intentional fires
-        if ((bldg != null)
-              && gameManager.tryIgniteHex(target.getPosition(), target.getBoardId(), subjectId, true, false,
-              new TargetRoll(weaponType.getFireTN(), weaponType.getName()), 5, vPhaseReport)) {
+        nDamage *= 3; // Plasma weapons deal triple damage to woods.
+
+        // report that damage was "applied" to terrain
+        Report report = new Report(3385);
+        report.indent(3);
+        report.subject = subjectId;
+        report.add(nDamage);
+        vPhaseReport.addElement(report);
+
+        // Any clear attempt can result in accidental ignition, even weapons that can't normally start fires. that's
+        // weird. Buildings can't be accidentally ignited.
+        // TODO: change this for TacOps - now you roll another 2d6 first and on a 5 or less you do a normal ignition
+        //  as though for intentional fires
+        if ((bldg != null) &&
+              gameManager.tryIgniteHex(target.getPosition(), target.getBoardId(), subjectId,
+                    true,
+                    false,
+                    new TargetRoll(weaponType.getFireTN(), weaponType.getName()),
+                    5,
+                    vPhaseReport)) {
             return;
         }
+
         Vector<Report> clearReports = gameManager.tryClearHex(target.getPosition(),
               target.getBoardId(),
               nDamage,
@@ -148,6 +241,13 @@ public class PlasmaMFUKWeaponHandler extends EnergyWeaponHandler {
         if (!clearReports.isEmpty()) {
             vPhaseReport.lastElement().newlines = 0;
         }
+
         vPhaseReport.addAll(clearReports);
+    }
+
+    @Override
+    protected void handleBuildingDamage(Vector<Report> vPhaseReport, IBuilding bldg, int nDamage, Coords coords) {
+        // Plasma weapons deal quad damage to buildings.
+        super.handleBuildingDamage(vPhaseReport, bldg, nDamage * 4, coords);
     }
 }
