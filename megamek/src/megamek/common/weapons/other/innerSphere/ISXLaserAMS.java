@@ -87,7 +87,7 @@ public class ISXLaserAMS extends LaserWeapon {
         techAdvancement.setTechBase(TechBase.IS)
               .setTechRating(TechRating.E)
               .setAvailability(AvailabilityValue.X, AvailabilityValue.X, AvailabilityValue.E, AvailabilityValue.D)
-              .setISAdvancement(DATE_NONE, 3048, 3079, DATE_NONE, DATE_NONE)
+              .setISAdvancement(3045, 3048, 3050, DATE_NONE, DATE_NONE)
               .setISApproximate(false, false, true, false, false)
               .setPrototypeFactions(Faction.FS)
               .setProductionFactions(Faction.FS)

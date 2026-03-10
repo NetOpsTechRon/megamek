@@ -54,10 +54,10 @@ public class ISXPlasmaRifle extends megamek.common.weapons.unofficial.PlasmaMFUK
         damage = 10;
         rackSize = 1;
         minimumRange = 0;
-        shortRange = 5;
-        mediumRange = 10;
-        longRange = 15;
-        extremeRange = 20;
+        shortRange = 8;
+        mediumRange = 16;
+        longRange = 18;
+        extremeRange = 24;
         tonnage = 6.0;
         criticalSlots = 1;
         bv = 240;

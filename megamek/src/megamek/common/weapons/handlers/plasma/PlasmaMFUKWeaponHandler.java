@@ -82,7 +82,7 @@ public class PlasmaMFUKWeaponHandler extends EnergyWeaponHandler {
             // if this is a fighter squadron, we need to account for the number of weapons should default to one for
             // non-squadrons
             for (int i = 0; i < numWeaponsHit; i++) {
-                extraHeat += Compute.d6(2);
+                extraHeat += Math.max(6,Compute.d6(2));
             }
 
             if (entityTarget.getArmor(hit) > 0

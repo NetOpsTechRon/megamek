@@ -86,7 +86,7 @@ public class CLXLaserAMS extends LaserWeapon {
         techAdvancement.setTechBase(TechBase.CLAN)
               .setTechRating(TechRating.F)
               .setAvailability(AvailabilityValue.X, AvailabilityValue.X, AvailabilityValue.E, AvailabilityValue.D)
-              .setClanAdvancement(DATE_NONE, 3048, 3079, DATE_NONE, DATE_NONE)
+              .setClanAdvancement(3045, 3048, 3050, DATE_NONE, DATE_NONE)
               .setClanApproximate(false, false, true, false, false)
               .setPrototypeFactions(Faction.CWF)
               .setProductionFactions(Faction.CWF)

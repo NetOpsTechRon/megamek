@@ -59,11 +59,11 @@ public class CLXPlasmaRifle extends PlasmaMFUKWeapon {
         damage = 10;
         rackSize = 1;
         minimumRange = 0;
-        shortRange = 6;
-        mediumRange = 12;
+        shortRange = 8;
+        mediumRange = 16;
         longRange = 18;
         extremeRange = 24;
-        tonnage = 6.0;
+        tonnage = 5.0;
         criticalSlots = 1;
         bv = 300;
         cost = 300000;
