@@ -59,17 +59,21 @@ public class CLXPlasmaRifle extends PlasmaMFUKWeapon {
         damage = 10;
         rackSize = 1;
         minimumRange = 0;
-        shortRange = 8;
+        shortRange = 10;
         mediumRange = 16;
-        longRange = 18;
-        extremeRange = 24;
+        longRange = 24;
+        extremeRange = 34;
+        waterShortRange = 4;
+        waterMediumRange = 10;
+        waterLongRange = 16;
+        waterExtremeRange = 24;
         tonnage = 5.0;
         criticalSlots = 1;
         bv = 300;
         cost = 300000;
         shortAV = 10;
         medAV = 10;
-        maxRange = RANGE_MED;
+        maxRange = RANGE_LONG;
         rulesRefs = "Unofficial";
         techAdvancement.setTechBase(TechBase.CLAN)
               .setIntroLevel(false)
@@ -84,6 +88,6 @@ public class CLXPlasmaRifle extends PlasmaMFUKWeapon {
 
     @Override
     public int getAlphaStrikeHeatDamage(int rangeband) {
-        return (rangeband <= AlphaStrikeElement.RANGE_BAND_MEDIUM) ? 3 : 0;
+        return (rangeband <= AlphaStrikeElement.RANGE_BAND_LONG) ? 3 : 0;
     }
 }

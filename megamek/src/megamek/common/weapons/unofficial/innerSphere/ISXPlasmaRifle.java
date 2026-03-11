@@ -54,17 +54,21 @@ public class ISXPlasmaRifle extends megamek.common.weapons.unofficial.PlasmaMFUK
         damage = 10;
         rackSize = 1;
         minimumRange = 0;
-        shortRange = 8;
+        shortRange = 10;
         mediumRange = 16;
-        longRange = 18;
-        extremeRange = 24;
+        longRange = 24;
+        extremeRange = 34;
+        waterShortRange = 4;
+        waterMediumRange = 10;
+        waterLongRange = 16;
+        waterExtremeRange = 24;
         tonnage = 6.0;
         criticalSlots = 1;
         bv = 240;
         cost = 260000;
         shortAV = 10;
         medAV = 10;
-        maxRange = RANGE_MED;
+        maxRange = RANGE_LONG;
         rulesRefs = "Unofficial";
         techAdvancement.setTechBase(TechBase.IS)
               .setIntroLevel(false)
@@ -79,6 +83,6 @@ public class ISXPlasmaRifle extends megamek.common.weapons.unofficial.PlasmaMFUK
 
     @Override
     public int getAlphaStrikeHeatDamage(int rangeband) {
-        return (rangeband <= megamek.common.alphaStrike.AlphaStrikeElement.RANGE_BAND_MEDIUM) ? 3 : 0;
+        return (rangeband <= megamek.common.alphaStrike.AlphaStrikeElement.RANGE_BAND_LONG) ? 3 : 0;
     }
 }
