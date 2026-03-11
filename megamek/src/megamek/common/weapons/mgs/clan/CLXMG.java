@@ -34,13 +34,22 @@
 
 package megamek.common.weapons.mgs.clan;
 
+import java.io.Serial;
+
+import megamek.common.enums.AvailabilityValue;
+import megamek.common.enums.Faction;
+import megamek.common.enums.TechBase;
+import megamek.common.enums.TechRating;
+import megamek.common.equipment.WeaponType;
+import megamek.common.weapons.mgs.MGMFUKWeapon;
+
 /**
  * @author Andrew Hunter
  * @since Oct 20, 2004
  */
-public class CLXMG extends megamek.common.weapons.mgs.MGWeapon {
-    @java.io.Serial
-    private static final long serialVersionUID = 2557645305248678454L;
+public class CLXMG extends MGMFUKWeapon {
+    @Serial
+    private static final long serialVersionUID = 2567643305248678454L;
 
     public CLXMG() {
         super();
@@ -49,7 +58,7 @@ public class CLXMG extends megamek.common.weapons.mgs.MGWeapon {
         addLookupName("Clan Machine Gun (X)");
         heat = 0;
         damage = 2;
-        infDamageClass = megamek.common.equipment.WeaponType.WEAPON_BURST_6D6;
+        infDamageClass = WeaponType.WEAPON_BURST_6D6;
         rackSize = 2;
         shortRange = 3;
         mediumRange = 6;
@@ -63,14 +72,14 @@ public class CLXMG extends megamek.common.weapons.mgs.MGWeapon {
         maxRange = RANGE_SHORT;
         atClass = CLASS_POINT_DEFENSE;
         rulesRefs = "228, TM";
-        techAdvancement.setTechBase(megamek.common.enums.TechBase.CLAN)
+        techAdvancement.setTechBase(TechBase.CLAN)
               .setIntroLevel(false)
               .setUnofficial(false)
-              .setTechRating(megamek.common.enums.TechRating.C)
-              .setAvailability(megamek.common.enums.AvailabilityValue.X, megamek.common.enums.AvailabilityValue.B, megamek.common.enums.AvailabilityValue.B, megamek.common.enums.AvailabilityValue.A)
+              .setTechRating(TechRating.C)
+              .setAvailability(AvailabilityValue.X, AvailabilityValue.B, AvailabilityValue.B, AvailabilityValue.A)
               .setClanAdvancement(2821, 2825, 2830, DATE_NONE, DATE_NONE)
               .setClanApproximate(true, false, false, false, false)
-              .setPrototypeFactions(megamek.common.enums.Faction.CSF)
-              .setProductionFactions(megamek.common.enums.Faction.CSF);
+              .setPrototypeFactions(Faction.CSF)
+              .setProductionFactions(Faction.CSF);
     }
 }

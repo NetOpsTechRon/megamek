@@ -40,12 +40,12 @@ import megamek.common.enums.AvailabilityValue;
 import megamek.common.enums.TechBase;
 import megamek.common.enums.TechRating;
 import megamek.common.equipment.WeaponType;
-import megamek.common.weapons.mgs.MGWeapon;
+import megamek.common.weapons.mgs.MGMFUKWeapon;
 
 /**
  * @author Sebastian Brocks
  */
-public class ISXMG extends MGWeapon {
+public class ISXMG extends MGMFUKWeapon {
     @Serial
     private static final long serialVersionUID = -4432163118750064849L;
 
