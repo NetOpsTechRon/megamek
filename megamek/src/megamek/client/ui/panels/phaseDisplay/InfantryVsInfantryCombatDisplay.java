@@ -43,15 +43,16 @@ import megamek.client.event.BoardViewEvent;
 import megamek.client.ui.Messages;
 import megamek.client.ui.clientGUI.ClientGUI;
 import megamek.client.ui.clientGUI.boardview.IBoardView;
+import megamek.client.ui.clientGUI.boardview.overlay.ToastLevel;
 import megamek.client.ui.dialogs.phaseDisplay.TargetChoiceDialog;
 import megamek.client.ui.widget.MegaMekButton;
-import megamek.common.board.Coords;
-import megamek.common.units.Targetable;
 import megamek.common.actions.ReinforceInfantryCombatAction;
 import megamek.common.actions.WithdrawInfantryCombatAction;
+import megamek.common.board.Coords;
 import megamek.common.units.AbstractBuildingEntity;
 import megamek.common.units.Entity;
 import megamek.common.units.Infantry;
+import megamek.common.units.Targetable;
 
 public class InfantryVsInfantryCombatDisplay extends AttackPhaseDisplay {
 
@@ -126,9 +127,14 @@ public class InfantryVsInfantryCombatDisplay extends AttackPhaseDisplay {
 
     @Override
     protected void setButtons() {
-        buttons.put(InfantryCombatCommand.INFANTRY_REINFORCE_COMBAT, createButton(InfantryCombatCommand.INFANTRY_REINFORCE_COMBAT.getCmd(), "InfantryVsInfantryCombatDisplay."));
-        buttons.put(InfantryCombatCommand.INFANTRY_WITHDRAW_COMBAT, createButton(InfantryCombatCommand.INFANTRY_WITHDRAW_COMBAT.getCmd(), "InfantryVsInfantryCombatDisplay."));
-        buttons.put(InfantryCombatCommand.INFANTRY_NEXT, createButton(InfantryCombatCommand.INFANTRY_NEXT.getCmd(), "InfantryVsInfantryCombatDisplay."));
+        buttons.put(InfantryCombatCommand.INFANTRY_REINFORCE_COMBAT,
+              createButton(InfantryCombatCommand.INFANTRY_REINFORCE_COMBAT.getCmd(),
+                    "InfantryVsInfantryCombatDisplay."));
+        buttons.put(InfantryCombatCommand.INFANTRY_WITHDRAW_COMBAT,
+              createButton(InfantryCombatCommand.INFANTRY_WITHDRAW_COMBAT.getCmd(),
+                    "InfantryVsInfantryCombatDisplay."));
+        buttons.put(InfantryCombatCommand.INFANTRY_NEXT,
+              createButton(InfantryCombatCommand.INFANTRY_NEXT.getCmd(), "InfantryVsInfantryCombatDisplay."));
         numButtonGroups = (int) Math.ceil((buttons.size() + 0.0) / buttonsPerGroup);
     }
 
@@ -169,23 +175,23 @@ public class InfantryVsInfantryCombatDisplay extends AttackPhaseDisplay {
 
         // Check if already in combat
         if (inf.getInfantryCombatTargetId() != Entity.NONE) {
-            clientgui.doAlertDialog("Impossible",
-                  "Already engaged in combat");
+            clientgui.addToast(ToastLevel.ERROR,
+                  Messages.getString("InfantryVsInfantryCombatDisplay.alreadyEngaged"));
             return;
         }
 
         // Check if target is a building
         Entity targetEntity = game.getEntity(target.getId());
         if (!(targetEntity instanceof AbstractBuildingEntity)) {
-            clientgui.doAlertDialog("Impossible",
-                  "Target must be a building");
+            clientgui.addToast(ToastLevel.ERROR,
+                  Messages.getString("InfantryVsInfantryCombatDisplay.targetMustBeBuilding"));
             return;
         }
 
         // Check if same hex
         if (!ce.getPosition().equals(targetEntity.getPosition())) {
-            clientgui.doAlertDialog("Impossible",
-                  "Must be in same hex as target");
+            clientgui.addToast(ToastLevel.ERROR,
+                  Messages.getString("InfantryVsInfantryCombatDisplay.mustBeSameHex"));
             return;
         }
 
@@ -197,8 +203,8 @@ public class InfantryVsInfantryCombatDisplay extends AttackPhaseDisplay {
               .anyMatch(e -> e.getInfantryCombatTargetId() != Entity.NONE);
 
         if (!combatExists) {
-            clientgui.doAlertDialog("Impossible",
-                  "No combat exists - use initiate action instead");
+            clientgui.addToast(ToastLevel.WARNING,
+                  Messages.getString("InfantryVsInfantryCombatDisplay.noCombatExists"));
             return;
         }
 
@@ -231,8 +237,8 @@ public class InfantryVsInfantryCombatDisplay extends AttackPhaseDisplay {
 
         // Only attackers can withdraw
         if (!inf.isInfantryCombatAttacker()) {
-            clientgui.doAlertDialog("Impossible",
-                  "Only attackers can withdraw from combat");
+            clientgui.addToast(ToastLevel.ERROR,
+                  Messages.getString("InfantryVsInfantryCombatDisplay.onlyAttackersWithdraw"));
             return;
         }
 
@@ -259,15 +265,14 @@ public class InfantryVsInfantryCombatDisplay extends AttackPhaseDisplay {
 
     /**
      * Checks for nag conditions before ending turn.
+     *
      * @return true if the turn should be cancelled
      */
     private boolean checkNags() {
         if (attacks.isEmpty() && currentEntity() != null) {
             String title = "Skip Turn?";
             String body = "You haven't taken any combat actions. Skip turn anyway?";
-            if (!clientgui.doYesNoDialog(title, body)) {
-                return true;  // User cancelled
-            }
+            return !clientgui.doYesNoDialog(title, body);  // User canceled
         }
         return false;
     }
@@ -356,15 +361,17 @@ public class InfantryVsInfantryCombatDisplay extends AttackPhaseDisplay {
     }
 
     /**
-     * Chooses a target from the given hex coordinates.
-     * If multiple entities exist at the hex, shows a dialog for selection.
+     * Chooses a target from the given hex coordinates. If multiple entities exist at the hex, shows a dialog for
+     * selection.
      */
     private Targetable chooseTarget(Coords coords) {
         List<Targetable> targets = new ArrayList<>();
 
         // Gather all entities at hex
         for (Entity e : game.getEntitiesVector()) {
-            if (e.getPosition() != null && e.getPosition().equals(coords) && e.getInfantryCombatTargetId() == e.getId()) {
+            if (e.getPosition() != null
+                  && e.getPosition().equals(coords)
+                  && e.getInfantryCombatTargetId() == e.getId()) {
                 targets.add(e);
             }
         }
@@ -372,16 +379,16 @@ public class InfantryVsInfantryCombatDisplay extends AttackPhaseDisplay {
         if (targets.isEmpty()) {
             return null;
         } else if (targets.size() == 1) {
-            return targets.get(0);
+            return targets.getFirst();
         } else {
             // Multiple targets - show choice dialog
             return TargetChoiceDialog.showSingleChoiceDialog(
-                clientgui.getFrame(),
-                "InfantryVsInfantryCombatDisplay.ChooseTargetDialog.title",
-                Messages.getString("InfantryVsInfantryCombatDisplay.ChooseTargetDialog.message"),
-                targets,
-                clientgui,
-                game.getEntity(currentEntity)
+                  clientgui.getFrame(),
+                  "InfantryVsInfantryCombatDisplay.ChooseTargetDialog.title",
+                  Messages.getString("InfantryVsInfantryCombatDisplay.ChooseTargetDialog.message"),
+                  targets,
+                  clientgui,
+                  game.getEntity(currentEntity)
             );
         }
     }
@@ -428,7 +435,7 @@ public class InfantryVsInfantryCombatDisplay extends AttackPhaseDisplay {
             return false;
         }
 
-        if (targetEntity.getSecondaryPositions().containsValue(entity.getPosition())) {
+        if (!targetEntity.getSecondaryPositions().containsValue(entity.getPosition())) {
             return false;
         }
 

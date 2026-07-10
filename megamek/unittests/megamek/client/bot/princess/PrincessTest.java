@@ -35,6 +35,7 @@ package megamek.client.bot.princess;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -69,6 +70,7 @@ import megamek.common.equipment.WeaponType;
 import megamek.common.exceptions.LocationFullException;
 import megamek.common.game.Game;
 import megamek.common.game.GameTurn;
+import megamek.common.moves.MovePath;
 import megamek.common.moves.MoveStep;
 import megamek.common.options.GameOptions;
 import megamek.common.options.OptionsConstants;
@@ -77,7 +79,6 @@ import megamek.common.rolls.PilotingRollData;
 import megamek.common.units.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -139,6 +140,27 @@ class PrincessTest {
 
         // Test a null ticks argument.
         assertEquals(0, Princess.calculateAdjustment(null));
+    }
+
+    @Test
+    void testGetMessageGuardsNonFiniteEstimate() {
+        Entity mockEntity = mock(Entity.class);
+        when(mockEntity.getChassis()).thenReturn("Flashman");
+        List<MovePath> paths = new ArrayList<>();
+
+        // A +Infinity estimate (produced when a prior zero-path turn divided elapsed time by 0) must not
+        // surface as the Integer.MAX_VALUE completion time that results from casting the double to int.
+        String infiniteMessage = Princess.getMessage(mockEntity, Double.POSITIVE_INFINITY, paths);
+        assertTrue(infiniteMessage.contains("unknown."));
+        assertFalse(infiniteMessage.contains(Integer.toString(Integer.MAX_VALUE)));
+
+        // NaN is likewise non-finite and must be reported as unknown rather than the 0 that (int) NaN yields.
+        String nanMessage = Princess.getMessage(mockEntity, Double.NaN, paths);
+        assertTrue(nanMessage.contains("unknown."));
+
+        // A normal finite estimate is still rendered as a seconds value.
+        String finiteMessage = Princess.getMessage(mockEntity, 12.0, paths);
+        assertTrue(finiteMessage.contains("12 seconds"));
     }
 
     @Test
@@ -970,10 +992,6 @@ class PrincessTest {
      */
     @Nested
     class InfantryCombatTests {
-
-        /**
-         * Tests for {@link Princess#getBuildingAtPosition(Coords)}.
-         */
         @Nested
         class GetBuildingAtPositionTests {
 
@@ -993,7 +1011,7 @@ class PrincessTest {
                 when(mockGame.getEntitiesVector(position)).thenReturn(entitiesAtPosition);
 
                 // Act
-                Entity result = null;
+                Entity result;
                 try {
                     java.lang.reflect.Method method = Princess.class.getDeclaredMethod(
                           "getBuildingAtPosition", Coords.class);
@@ -1022,7 +1040,7 @@ class PrincessTest {
                 when(mockGame.getEntitiesVector(position)).thenReturn(entitiesAtPosition);
 
                 // Act
-                Entity result = null;
+                Entity result;
                 try {
                     java.lang.reflect.Method method = Princess.class.getDeclaredMethod(
                           "getBuildingAtPosition", Coords.class);
@@ -1033,13 +1051,10 @@ class PrincessTest {
                 }
 
                 // Assert
-                assertEquals(null, result);
+                assertNull(result);
             }
         }
 
-        /**
-         * Tests for {@link Princess#findEligibleInfantryCombatsToReinforce(Entity)}.
-         */
         @Nested
         class FindEligibleInfantryCombatsToReinforceTests {
 
@@ -1060,8 +1075,6 @@ class PrincessTest {
                 List<Entity> entitiesAtInfantryPos = new ArrayList<>();
                 entitiesAtInfantryPos.add(mockBuilding);
                 when(mockGame.getEntitiesVector(infantryPos)).thenReturn(entitiesAtInfantryPos);
-                //doReturn(entitiesAtInfantryPos).when(mockGame).getEntitiesVector(infantryPos);
-                //when(mockGame.getEntitiesVector(infantryPos, false)).thenReturn(entitiesAtInfantryPos);
 
                 Infantry combatInfantry = mock(Infantry.class);
                 when(combatInfantry.getInfantryCombatTargetId()).thenReturn(100);
@@ -1073,7 +1086,7 @@ class PrincessTest {
                 when(mockGame.getEntity(100)).thenReturn(mockBuilding);
 
                 // Act
-                List<Integer> result = null;
+                List<Integer> result;
                 try {
                     java.lang.reflect.Method method = Princess.class.getDeclaredMethod(
                           "findEligibleInfantryCombatsToReinforce", Entity.class);
@@ -1121,7 +1134,7 @@ class PrincessTest {
                 when(mockGame.getEntity(200)).thenReturn(building2);
 
                 // Act
-                List<Integer> result = null;
+                List<Integer> result;
                 try {
                     java.lang.reflect.Method method = Princess.class.getDeclaredMethod(
                           "findEligibleInfantryCombatsToReinforce", Entity.class);
@@ -1153,7 +1166,7 @@ class PrincessTest {
                 when(mockGame.getEntitiesVector(infantryPos)).thenReturn(entitiesAtInfantryPos);
 
                 // Act
-                List<Integer> result = null;
+                List<Integer> result;
                 try {
                     java.lang.reflect.Method method = Princess.class.getDeclaredMethod(
                           "findEligibleInfantryCombatsToReinforce", Entity.class);

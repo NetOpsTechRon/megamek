@@ -38,15 +38,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -55,6 +47,7 @@ import javax.swing.ScrollPaneConstants;
 
 import megamek.client.AbstractClient;
 import megamek.client.Client;
+import megamek.client.bot.princess.BehaviorSettings;
 import megamek.client.bot.princess.CardinalEdge;
 import megamek.client.ui.clientGUI.ClientGUI;
 import megamek.common.ECMInfo;
@@ -63,6 +56,7 @@ import megamek.common.Player;
 import megamek.common.Report;
 import megamek.common.ToHitData;
 import megamek.common.actions.EntityAction;
+import megamek.common.actions.GhostTargetAction;
 import megamek.common.actions.WeaponAttackAction;
 import megamek.common.annotations.Nullable;
 import megamek.common.board.Board;
@@ -75,6 +69,7 @@ import megamek.common.equipment.AmmoType;
 import megamek.common.equipment.AmmoType.AmmoTypeEnum;
 import megamek.common.equipment.AmmoType.Munitions;
 import megamek.common.equipment.Minefield;
+import megamek.common.equipment.MiscMounted;
 import megamek.common.equipment.MiscType;
 import megamek.common.equipment.Mounted;
 import megamek.common.equipment.WeaponMounted;
@@ -99,6 +94,7 @@ import megamek.common.units.EntityListFile;
 import megamek.common.units.EntityMovementMode;
 import megamek.common.units.IBuilding;
 import megamek.common.units.Infantry;
+import megamek.common.units.Mek;
 import megamek.common.units.ProtoMek;
 import megamek.common.units.Terrains;
 import megamek.common.units.VTOL;
@@ -125,6 +121,15 @@ public abstract class BotClient extends Client {
 
     // Let bots remember whether they've rerolled an initiative roll this round
     protected boolean rerolledInitiative = false;
+
+    /**
+     * The bot's personality/configuration state. Held on {@link BotClient} because it is generic bot-personality
+     * state (sliders, targeting, retreat edges) shared by every bot implementation, not specific to any one AI.
+     * Initialized to a default so it is never {@code null}: subclasses normally replace it via
+     * {@link #setBehaviorSettings(BehaviorSettings)} during construction, but the default preserves the
+     * non-null contract that {@link #getBehaviorSettings()} callers rely on even if a subclass does not.
+     */
+    protected BehaviorSettings behaviorSettings = new BehaviorSettings();
 
     /**
      * Store a reference to the ClientGUI for the client who created this bot. This is used to ensure keep the ClientGUI
@@ -304,6 +309,22 @@ public abstract class BotClient extends Client {
 
     protected abstract void calculateDeployment() throws Exception;
 
+    /**
+     * @return this bot's current behavior settings (personality/configuration state)
+     */
+    public BehaviorSettings getBehaviorSettings() {
+        return behaviorSettings;
+    }
+
+    /**
+     * Applies the given behavior settings to this bot. Implementations decide how the settings take effect (for
+     * example, re-initializing scorers or notifying the server) and are responsible for storing them in
+     * {@link #behaviorSettings}.
+     *
+     * @param behaviorSettings the new behavior settings to apply
+     */
+    public abstract void setBehaviorSettings(BehaviorSettings behaviorSettings);
+
     protected void initTargeting() {
     }
 
@@ -317,25 +338,85 @@ public abstract class BotClient extends Client {
     }
 
     /**
-     * Calculates the pre phase turn currently does nothing other than end turn
+     * Calculates the pre phase turn. In Standard ghost target mode during PRE_FIRING, assigns ghost targets for any
+     * qualifying equipment. Otherwise just ends the turn.
      */
     protected void calculatePrePhaseTurn() {
-        sendPrePhaseData(game.getFirstEntityNum(getMyTurn()));
+        int entityId = game.getFirstEntityNum(getMyTurn());
+        Entity entity = game.getEntity(entityId);
+
+        // Assign ghost targets in Standard mode during PRE_FIRING
+        if ((entity != null) && game.getPhase().isPreFiring()
+              && game.usesStandardGhostTargetMode()) {
+            assignBotGhostTargets(entity);
+        }
+
+        sendPrePhaseData(entityId);
         sendDone(true);
+    }
+
+    /**
+     * Simple bot heuristic for ghost target assignment in Standard mode. For each ghost-target-capable equipment: jam
+     * the nearest enemy within range, or protect self if no enemies are in range.
+     */
+    private void assignBotGhostTargets(Entity source) {
+        if (source.getPosition() == null) {
+            return;
+        }
+
+        for (MiscMounted m : source.getMisc()) {
+            if (!source.isGhostTargetCapable(m)) {
+                continue;
+            }
+
+            int equipId = source.getEquipmentNum(m);
+            assignBotGhostTargetForEquipment(source, equipId);
+        }
+
+        // Mek Cockpit Command Console (cockpit type, not misc equipment)
+        if ((source instanceof Mek mek)
+              && (mek.getCockpitType() == Mek.COCKPIT_COMMAND_CONSOLE
+              || mek.getCockpitType() == Mek.COCKPIT_SUPERHEAVY_COMMAND_CONSOLE
+              || mek.getCockpitType() == Mek.COCKPIT_SMALL_COMMAND_CONSOLE)) {
+            assignBotGhostTargetForEquipment(source, GhostTargetAction.CCC_EQUIPMENT_ID);
+        }
+    }
+
+    /**
+     * Assigns a single ghost target for the given equipment on the source entity. Jams the nearest enemy within 6
+     * hexes, or protects self if none in range.
+     */
+    private void assignBotGhostTargetForEquipment(Entity source, int equipId) {
+        Entity bestTarget = null;
+        int bestDistance = Integer.MAX_VALUE;
+
+        for (Entity enemy : game.inGameTWEntities()) {
+            if (!enemy.isEnemyOf(source) || !enemy.isDeployed() || enemy.isDestroyed()
+                  || (enemy.getPosition() == null) || enemy.isConventionalInfantry()) {
+                continue;
+            }
+            int dist = source.getPosition().distance(enemy.getPosition());
+            if ((dist <= 6) && (dist < bestDistance)) {
+                bestDistance = dist;
+                bestTarget = enemy;
+            }
+        }
+
+        sendGhostTargetAction(source.getId(), equipId, Objects.requireNonNullElse(bestTarget, source).getId());
     }
 
     @Nullable
     protected abstract PhysicalOption calculatePhysicalTurn();
 
     /**
-     * Calculate what to do during the PRE_END_DECLARATIONS phase.
-     * This phase allows infantry to initiate building/vessel combat.
+     * Calculate what to do during the PRE_END_DECLARATIONS phase. This phase allows infantry to initiate
+     * building/vessel combat.
      */
     protected abstract void calculatePreEndDeclarationsTurn();
 
     /**
-     * Calculate what to do during the INFANTRY_VS_INFANTRY_COMBAT phase.
-     * This phase allows infantry to reinforce or withdraw from building/vessel combat.
+     * Calculate what to do during the INFANTRY_VS_INFANTRY_COMBAT phase. This phase allows infantry to reinforce or
+     * withdraw from building/vessel combat.
      */
     protected abstract void calculateInfantryVsInfantryCombatTurn();
 
@@ -1216,7 +1297,11 @@ public abstract class BotClient extends Client {
                                     for (Entity test_ent : game.getEntitiesVector()) {
                                         if (check_ent.isEnemyOf(test_ent)) {
                                             total_bv += test_ent.calculateBattleValue();
-                                            if (test_ent.isVisibleToEnemy()) {
+                                            // Skip enemies without a position (off-board, not yet deployed, in
+                                            // transport, etc.) - we can't measure distance to them, and including
+                                            // them in the count/BV would skew the (known_range / known_count)
+                                            // average. Mirrors the check_ent null-position guard above.
+                                            if ((test_ent.getPosition() != null) && test_ent.isVisibleToEnemy()) {
                                                 known_count++;
                                                 known_bv += test_ent.calculateBattleValue();
                                                 known_range += Compute.effectiveDistance(game, check_ent, test_ent);

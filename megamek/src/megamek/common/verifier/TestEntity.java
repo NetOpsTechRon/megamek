@@ -82,11 +82,10 @@ public abstract class TestEntity implements TestEntityOption {
     private final TestEntityOption options;
 
     /**
-     * Optional game year to use for intro date validation instead of the unit's intro year.
-     * When set to a value > 0, {@link #hasIncorrectIntroYear(StringBuffer)} will compare equipment
-     * intro dates against this year instead of the entity's year. This supports the "Use Game Year"
-     * setting in MegaMekLab where equipment availability is determined by the configured game year
-     * rather than the unit's intro year.
+     * Optional game year to use for intro date validation instead of the unit's intro year. When set to a value > 0,
+     * {@link #hasIncorrectIntroYear(StringBuffer)} will compare equipment intro dates against this year instead of the
+     * entity's year. This supports the "Use Game Year" setting in MegaMekLab where equipment availability is determined
+     * by the configured game year rather than the unit's intro year.
      */
     private int gameYear = -1;
 
@@ -158,7 +157,7 @@ public abstract class TestEntity implements TestEntityOption {
         } else if (unit.hasETypeFlag(Entity.ETYPE_BATTLEARMOR)) {
             testEntity = new TestBattleArmor((BattleArmor) unit, entityVerifier.baOption, null);
         } else if (unit.hasETypeFlag(Entity.ETYPE_INFANTRY)) {
-            testEntity = new TestInfantry((Infantry) unit, entityVerifier.infOption, null);
+            testEntity = new TestInfantry((ConvInfantry) unit, entityVerifier.infOption, null);
         }
         return testEntity;
     }
@@ -294,8 +293,8 @@ public abstract class TestEntity implements TestEntityOption {
     }
 
     /**
-     * Gets the game year to use for intro date validation. When > 0, equipment intro dates are
-     * compared against this year instead of the entity's intro year.
+     * Gets the game year to use for intro date validation. When > 0, equipment intro dates are compared against this
+     * year instead of the entity's intro year.
      *
      * @return The game year, or -1 if not set (use entity year)
      */
@@ -304,10 +303,9 @@ public abstract class TestEntity implements TestEntityOption {
     }
 
     /**
-     * Sets the game year to use for intro date validation. When set to a value > 0, equipment intro
-     * dates will be compared against this year instead of the entity's intro year. This supports
-     * scenarios where equipment availability is determined by a campaign's current year rather than
-     * the unit's original intro year.
+     * Sets the game year to use for intro date validation. When set to a value > 0, equipment intro dates will be
+     * compared against this year instead of the entity's intro year. This supports scenarios where equipment
+     * availability is determined by a campaign's current year rather than the unit's original intro year.
      *
      * @param gameYear The game year to use, or -1 to use entity year
      */
@@ -382,6 +380,7 @@ public abstract class TestEntity implements TestEntityOption {
      *
      * @return The input value truncated to the number of decimal places supplied
      */
+    @Deprecated(since = "0.51.0", forRemoval = true)
     public static double setPrecision(double value, int precision) {
         return Math.round(value * Math.pow(10, precision)) / Math.pow(10, precision);
     }
@@ -1027,24 +1026,54 @@ public abstract class TestEntity implements TestEntityOption {
               + printMiscEquip() + printWeapon() + printAmmo();
     }
 
-    public boolean correctWeight(StringBuffer buff) {
-        return correctWeight(buff, showOverweightedEntity(),
-              showUnderweightEntity());
+    /**
+     * Tests the calculated weight of the unit (the sum of the weights of all its components) and the assumed weight
+     * (the fixed tonnage it is constructed with). Returns false if there are errors with the values (e.g. overweight,
+     * underweight if the unit type does not allow it, mek weight must be a multiple of 5t).
+     *
+     * @return true if there are no problems with the unit's assumed and calculated weight values
+     */
+    @Deprecated(since = "0.51.0", forRemoval = true)
+    public final boolean isWeightCorrect() {
+        return correctWeight(new StringBuffer());
     }
 
-    public boolean correctWeight(StringBuffer buff, boolean showO, boolean showU) {
+    /**
+     * Tests the calculated weight of the unit (the sum of the weights of all its components) and the assumed weight
+     * (the fixed tonnage it is constructed with). Returns false if there are errors with the values (e.g. overweight,
+     * underweight if the unit type does not allow it, mek weight must be a multiple of 5t). Any error reports are
+     * appended to the given StringBuffer.
+     *
+     * @return true if there are no problems with the unit's assumed and calculated weight values
+     */
+    public final boolean correctWeight(StringBuffer buff) {
+        return correctWeight(buff, !showOverweightedEntity(), !showUnderweightEntity());
+    }
+
+    /**
+     * Tests the calculated weight of the unit (the sum of the weights of all its components) and the assumed weight
+     * (the fixed tonnage it is constructed with). Returns false if there are errors with the values (e.g. overweight,
+     * underweight if the unit type does not allow it, mek weight must be a multiple of 5t).
+     *
+     * @param buff              The StringBuffer to append error messages to
+     * @param ignoreOverweight  When true, ignore overweight
+     * @param ignoreUnderweight When true, ignore underweight
+     *
+     * @return true if there are no problems with the unit's assumed and calculated weight values
+     */
+    public boolean correctWeight(StringBuffer buff, boolean ignoreOverweight, boolean ignoreUnderweight) {
         double weightSum = calculateWeight();
         double weight = getWeight();
+        boolean useKg = usesKgStandard();
 
-        if (showO && ((weight + getMaxOverweight()) < weightSum)) {
-            buff.append("Weight: ").append(calculateWeight())
-                  .append(" is greater than ").append(getWeight())
-                  .append("\n");
+        if (!ignoreOverweight && ((weight + getMaxOverweight()) < weightSum)) {
+            buff.append("Weight: %s is greater than %s\n"
+                  .formatted(makeWeightString(weightSum, useKg), makeWeightString(weight, useKg)));
             return false;
         }
-        if (showU && ((weight - getMinUnderweight()) > weightSum)) {
-            buff.append("Weight: ").append(calculateWeight())
-                  .append(" is less than ").append(getWeight()).append("\n");
+        if (!ignoreUnderweight && ((weight - getMinUnderweight()) > weightSum)) {
+            buff.append("Weight: %s is less than %s\n"
+                  .formatted(makeWeightString(weightSum, useKg), makeWeightString(weight, useKg)));
             return false;
         }
         return true;
@@ -1187,6 +1216,7 @@ public abstract class TestEntity implements TestEntityOption {
         }
     }
 
+    @Deprecated(since = "0.51.0", forRemoval = true)
     public boolean hasIllegalTechLevels(StringBuffer buff) {
         return hasIllegalTechLevels(buff, getEntity().getTechLevel());
     }
@@ -1204,7 +1234,7 @@ public abstract class TestEntity implements TestEntityOption {
         int eTechLevel = SimpleTechLevel.convertCompoundToSimple(getEntity().getTechLevel()).ordinal();
         int ammoRulesLevel = SimpleTechLevel.convertCompoundToSimple(ammoTechLvl).ordinal();
         int eRulesLevel = getEntity().findMinimumRulesLevel().ordinal();
-        if ((eTechLevel >= eRulesLevel) && (getEntity().getEarliestTechDate() <= getEntity().getYear())) {
+        if ((eTechLevel >= eRulesLevel) && isIntroducedByValidationYear(getEntity().getEarliestTechDate(), 0)) {
             return false;
         }
 
@@ -1406,8 +1436,9 @@ public abstract class TestEntity implements TestEntityOption {
     }
 
     /**
-     * Compares intro dates of all components to the unit intro year (or game year if available).
-     * The year used for comparison is determined in order of priority:
+      * Compares intro dates of all components to the unit intro year (or game year if available). If the unit has an
+      * explicit original build year, that year is also accepted for components retained from the original build. The
+      * current/refit year used for comparison is determined in order of priority:
      * <ol>
      *   <li>If {@link #setGameYear(int)} was called with a value > 0, use that year</li>
      *   <li>Otherwise, use {@link Entity#getTechLevelYear()} which returns the game's ALLOWED_YEAR
@@ -1421,17 +1452,14 @@ public abstract class TestEntity implements TestEntityOption {
      */
     public boolean hasIncorrectIntroYear(StringBuffer buff) {
         boolean retVal = false;
-        // Use explicitly set game year if available, otherwise use entity's tech level year
-        // (which checks game options first, then falls back to entity year)
-        int baseYear = (gameYear > 0) ? gameYear : getEntity().getTechLevelYear();
-        if (getEntity().getEarliestTechDate() <= baseYear + getIntroYearMargin()) {
+        int introYearMargin = getIntroYearMargin();
+        if (isIntroducedByValidationYear(getEntity().getEarliestTechDate(), introYearMargin)) {
             return false;
         }
-        int useIntroYear = baseYear + getIntroYearMargin();
         if (getEntity().isOmni()) {
             int introDate = Entity.getOmniAdvancement(getEntity()).getIntroductionDate(
                   getEntity().isClan() || getEntity().isMixedTech());
-            if (useIntroYear < introDate) {
+            if (!isIntroducedByValidationYear(introDate, introYearMargin)) {
                 retVal = true;
                 buff.append("Omni technology has intro date of ");
                 buff.append(introDate);
@@ -1456,7 +1484,7 @@ public abstract class TestEntity implements TestEntityOption {
                 introDate = nextE.getIntroductionDate();
             }
 
-            if (introDate > useIntroYear) {
+            if (!isIntroducedByValidationYear(introDate, introYearMargin)) {
                 retVal = true;
                 buff.append(nextE.getName());
                 buff.append(" has intro date of ");
@@ -1472,7 +1500,7 @@ public abstract class TestEntity implements TestEntityOption {
             int intro = getEntity().isMixedTech()
                   ? Entity.getPatchworkArmorAdvancement().getIntroductionDate()
                   : Entity.getPatchworkArmorAdvancement().getIntroductionDate(getEntity().isClan());
-            if (useIntroYear < intro) {
+            if (!isIntroducedByValidationYear(intro, introYearMargin)) {
                 retVal = true;
                 buff.append("Patchwork armor has intro date of ");
                 buff.append(intro);
@@ -1498,7 +1526,7 @@ public abstract class TestEntity implements TestEntityOption {
             if (getEntity().isMixedTech()) {
                 introDate = at.getIntroductionDate();
             }
-            if (introDate > useIntroYear) {
+            if (!isIntroducedByValidationYear(introDate, introYearMargin)) {
                 retVal = true;
                 buff.append(at.getName());
                 buff.append(" armor has intro date of ");
@@ -1521,7 +1549,7 @@ public abstract class TestEntity implements TestEntityOption {
             if (getEntity().isMixedTech()) {
                 introDate = cockpit.getIntroductionDate();
             }
-            if (introDate > useIntroYear) {
+            if (!isIntroducedByValidationYear(introDate, introYearMargin)) {
                 retVal = true;
                 buff.append(cockpitName);
                 buff.append(" has intro date of ");
@@ -1536,7 +1564,7 @@ public abstract class TestEntity implements TestEntityOption {
                 if (getEntity().isMixedTech()) {
                     introDate = gyro.getIntroductionDate();
                 }
-                if (introDate > useIntroYear) {
+                if (!isIntroducedByValidationYear(introDate, introYearMargin)) {
                     retVal = true;
                     buff.append(((Mek) getEntity()).getGyroTypeString());
                     buff.append(" has intro date of ");
@@ -1551,7 +1579,7 @@ public abstract class TestEntity implements TestEntityOption {
             if (getEntity().isMixedTech()) {
                 introDate = engine.getIntroductionDate();
             }
-            if (introDate > useIntroYear) {
+            if (!isIntroducedByValidationYear(introDate, introYearMargin)) {
                 retVal = true;
                 buff.append(getEntity().getEngine().getShortEngineName());
                 buff.append(" has intro date of ");
@@ -1561,6 +1589,18 @@ public abstract class TestEntity implements TestEntityOption {
         }
 
         return retVal;
+    }
+
+    private List<Integer> getIntroYearValidationYears() {
+        int baseYear = (gameYear > 0) ? gameYear : getEntity().getTechLevelYear();
+        if (getEntity().hasOriginalBuildYear() && (getEntity().getOriginalBuildYear() != baseYear)) {
+            return List.of(baseYear, getEntity().getOriginalBuildYear());
+        }
+        return List.of(baseYear);
+    }
+
+    private boolean isIntroducedByValidationYear(int introDate, int margin) {
+        return getIntroYearValidationYears().stream().anyMatch(year -> introDate <= year + margin);
     }
 
     public boolean hasFailedEquipment(StringBuffer buff) {
@@ -1837,7 +1877,9 @@ public abstract class TestEntity implements TestEntityOption {
         for (var loc : modArmorByLocation.keySet()) {
             if (modArmorByLocation.get(loc) > 1) {
                 buff.append("Only one modular armor slot may be mounted in a single location (")
-                      .append(getEntity().getLocationName(loc.getLeft())).append(loc.getRight() ? " (R))" : ")").append('\n');
+                      .append(getEntity().getLocationName(loc.getLeft()))
+                      .append(loc.getRight() ? " (R))" : ")")
+                      .append('\n');
                 illegal = true;
             }
         }
@@ -1917,7 +1959,7 @@ public abstract class TestEntity implements TestEntityOption {
         } else if (entity instanceof ProtoMek) {
             return TestProtoMek.isValidProtoMekLocation((ProtoMek) entity, eq, location, buffer);
         } else if (entity.isFighter()) {
-            return TestAero.isValidAeroLocation(eq, location, buffer);
+            return TestAero.isValidAeroLocation((Aero) entity, eq, location, buffer);
         }
         return true;
     }

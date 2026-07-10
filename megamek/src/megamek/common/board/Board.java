@@ -1,7 +1,7 @@
 /*
   Copyright (Cc) 2000-2004 Ben Mazur (bmazur@sev.org)
  * Copyright (c) 2013 Edward Cullen (eddy@obsessedcomputers.co.uk)
- * Copyright (C) 2002-2025 The MegaMek Team. All Rights Reserved.
+ * Copyright (C) 2002-2026 The MegaMek Team. All Rights Reserved.
  *
  * This file is part of MegaMek.
  *
@@ -161,6 +161,14 @@ public class Board implements Serializable {
      * Record the infernos placed on the board.
      */
     private final Hashtable<Coords, InfernoTracker> infernos = new Hashtable<>();
+
+    /**
+     * Coords of fires started by fuel-fed flamers (such as Vehicular Flamers). These fires are harder for firefighting
+     * engineers to put out (TO:AuE p.153), the same way inferno fires are.
+     * <p>Not final: save games made before this field existed deserialize it as null, so the accessors guard against
+     * that.</p>
+     */
+    private Set<Coords> flamerStartedFires = new HashSet<>();
 
     private Map<Coords, Collection<SpecialHexDisplay>> specialHexes = new Hashtable<>();
 
@@ -1008,6 +1016,21 @@ public class Board implements Serializable {
     public void load(final File filepath) {
         try (InputStream is = new FileInputStream(filepath)) {
             load(is);
+            // Default the displayable map name to the filename (without .board) when loading a legacy
+            // .board file. The YAML deserializer sets it explicitly; the legacy loader has no in-file
+            // map-name field, so we use the filename so the UI shows something more useful than the
+            // BOARD_NAME_UNNAMED placeholder.
+            if (BOARD_NAME_UNNAMED.equals(mapName)) {
+                String fileName = filepath.getName();
+                // Locale.ROOT keeps the case fold deterministic - default locale could mishandle the
+                // dotless-i case (Turkish) and miss the .board suffix.
+                if (fileName.toLowerCase(Locale.ROOT).endsWith(".board")) {
+                    fileName = fileName.substring(0, fileName.length() - ".board".length());
+                }
+                if (!fileName.isBlank()) {
+                    mapName = fileName;
+                }
+            }
         } catch (IOException ex) {
             logger.error("IO Error opening file to load board! {}", String.valueOf(ex));
         }
@@ -1232,8 +1255,8 @@ public class Board implements Serializable {
     }
 
     /**
-     * Writes data for the board, as text to the OutputStream.
-     * Uses the GUI preference to determine whether to include the license header.
+     * Writes data for the board, as text to the OutputStream. Uses the GUI preference to determine whether to include
+     * the license header.
      *
      * @param os the OutputStream to write to
      */
@@ -1355,6 +1378,41 @@ public class Board implements Serializable {
         infernos.remove(coords);
     }
 
+    /**
+     * Record that a fire at the given coordinates was started by a fuel-fed flamer (TO:AuE p.153). Such fires are harder
+     * for firefighting engineers to extinguish.
+     *
+     * @param coords the <code>Coords</code> of the flamer-started fire
+     */
+    public void markFlamerStartedFire(Coords coords) {
+        if (contains(coords)) {
+            if (flamerStartedFires == null) {
+                flamerStartedFires = new HashSet<>();
+            }
+            flamerStartedFires.add(coords);
+        }
+    }
+
+    /**
+     * Clear the flamer-started fire marker for the given coordinates, e.g. when the fire goes out.
+     *
+     * @param coords the <code>Coords</code> to clear
+     */
+    public void removeFlamerStartedFire(Coords coords) {
+        if (flamerStartedFires != null) {
+            flamerStartedFires.remove(coords);
+        }
+    }
+
+    /**
+     * @param coords the <code>Coords</code> being checked
+     *
+     * @return true if the fire at these coordinates was started by a fuel-fed flamer
+     */
+    public boolean isFlamerStartedFire(Coords coords) {
+        return (flamerStartedFires != null) && flamerStartedFires.contains(coords);
+    }
+
     public void removeBombIconsFrom(Coords coords) {
         // Do nothing if the coords aren't on this board.
         if (!this.contains(coords) || null == specialHexes.get(coords)) {
@@ -1400,6 +1458,7 @@ public class Board implements Serializable {
      *
      * @return an <code>Enumeration</code> of <code>Coords</code> that have infernos still burning.
      */
+    @Deprecated(since = "0.51.0", forRemoval = true)
     public Enumeration<Coords> getInfernoBurningCoords() {
         // Only include *burning* inferno trackers.
         Vector<Coords> burning = new Vector<>();
@@ -1478,7 +1537,12 @@ public class Board implements Serializable {
         // Remove the building from the building map.
         IBuilding bldg = bldgByCoords.get(coords);
         if (bldg == null) {
-            logger.error("No building found at {}", coords);
+            // Reaching this guard is expected when callers hand us coords that do not currently map to a building,
+            // such as a non-building hex, a duplicate collapse request for the same hex, or a coord that was already
+            // processed earlier in the collapse flow. Since bldgByCoords is maintained per hex, removing one coord
+            // below does not by itself clear the other hexes of a multi-hex building. Logging at debug avoids
+            // polluting megamek.log during normal play while preserving the trail for diagnostics.
+            logger.debug("No building found at {}", coords);
             return;
         }
         bldg.removeHex(coords);
@@ -1504,6 +1568,8 @@ public class Board implements Serializable {
         curHex.removeTerrain(Terrains.BRIDGE);
         curHex.removeTerrain(Terrains.BRIDGE_CF);
         curHex.removeTerrain(Terrains.BRIDGE_ELEV);
+        // A destroyed section drops its field-repair badge along with the bridge terrain.
+        curHex.removeTerrain(Terrains.BRIDGE_REPAIRED);
 
         // Add rubble terrain that matches the building type.
         if (type > 0) {
@@ -2086,6 +2152,7 @@ public class Board implements Serializable {
     /**
      * Resets the "intermediate" deployment zones associated with this board, in case the deployment zones change
      */
+    @Deprecated(since = "0.51.0", forRemoval = true)
     public void resetDeploymentZones() {
         deploymentZones = null;
     }
@@ -2240,7 +2307,9 @@ public class Board implements Serializable {
 
     /**
      * Add a building and all of its coordinates to the board. {@link BuildingTerrain} should be added when
-     * initializing, this method is public so {@link AbstractBuildingEntity} can register buildings when deploying buildings.
+     * initializing, this method is public so {@link AbstractBuildingEntity} can register buildings when deploying
+     * buildings.
+     *
      * @param bldg {@link IBuilding} to add to the board
      */
     public void addBuildingToBoard(IBuilding bldg) {

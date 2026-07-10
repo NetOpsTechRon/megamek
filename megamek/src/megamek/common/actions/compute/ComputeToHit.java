@@ -38,6 +38,7 @@ import java.util.List;
 import megamek.client.ui.Messages;
 import megamek.common.*;
 import megamek.common.actions.WeaponAttackAction;
+import megamek.common.annotations.Nullable;
 import megamek.common.battleArmor.BattleArmor;
 import megamek.common.board.Coords;
 import megamek.common.compute.Compute;
@@ -56,6 +57,7 @@ import megamek.common.game.Game;
 import megamek.common.interfaces.ILocationExposureStatus;
 import megamek.common.options.OptionsConstants;
 import megamek.common.rolls.TargetRoll;
+import megamek.common.units.ConvInfantry;
 import megamek.common.units.Entity;
 import megamek.common.units.EntityMovementType;
 import megamek.common.units.IBuilding;
@@ -130,7 +132,8 @@ public class ComputeToHit {
 
         boolean isWeaponInfantry = weaponType.hasFlag(WeaponType.F_INFANTRY) && !ae.isSupportVehicle();
 
-        boolean isWeaponFieldGuns = isAttackerInfantry && (weapon.getLocation() == Infantry.LOC_FIELD_GUNS);
+        boolean isWeaponFieldGuns =
+              (ae instanceof ConvInfantry) && (weapon.getLocation() == ConvInfantry.LOC_FIELD_GUNS);
         // 2003-01-02 BattleArmor MG and Small Lasers have unlimited ammo.
         // 2002-09-16 Infantry weapons have unlimited ammo.
 
@@ -454,6 +457,17 @@ public class ComputeToHit {
             }
 
             losMods = los.losModifiers(game, eiSystemStatus, underWater);
+
+            // Overhead Arms quirk (BMM p.85): a standing Mek treats its arm-mounted weapons as one
+            // level higher when determining terrain LOS modifiers (intervening woods, partial cover).
+            // The quirk may not create line of sight where none exists, so it only applies when the
+            // normal line of sight is not blocked.
+            OverheadArmsLos overheadArmsLos = overheadArmsLos(game, weaponEntity, game.getEntity(ae.getId()),
+                  weapon, target, eiSystemStatus, underWater, losMods);
+            if (overheadArmsLos != null) {
+                los = overheadArmsLos.los();
+                losMods = overheadArmsLos.losMods();
+            }
         } else {
             if (exchangeSwarmTarget) {
                 // Swarm should draw LoS between targets, not attacker, since we don't want LoS to be blocked
@@ -745,7 +759,8 @@ public class ComputeToHit {
               inSameBuilding,
               isIndirect,
               isPointblankShot,
-              underWater);
+              underWater,
+              allECMInfo);
 
         // If this is a swarm LRM secondary attack, remove old target movement and
         // terrain mods, then
@@ -979,6 +994,70 @@ public class ComputeToHit {
         }
 
         return toHit;
+    }
+
+    /**
+     * The result of applying the Overhead Arms quirk to weapon-fire line of sight: the elevated line of sight and the
+     * matching terrain LOS modifiers.
+     *
+     * @param los     the line of sight recalculated one level higher
+     * @param losMods the terrain LOS modifiers derived from the elevated line of sight
+     */
+    private record OverheadArmsLos(LosEffects los, ToHitData losMods) {}
+
+    /**
+     * Applies the Overhead Arms quirk (BMM p.85) to weapon-fire line of sight. A standing {@code Mek} with this quirk
+     * treats its arm-mounted weapons as one level higher when determining the effect of terrain on line of sight
+     * (intervening woods, partial cover). The quirk may not create line of sight where none exists, so it only takes
+     * effect when the normal line of sight is not blocked.
+     *
+     * @param game           the current {@link Game}
+     * @param weaponEntity   the entity carrying the firing weapon, used for the quirk and weapon-location checks
+     * @param attacker       the attacking entity used as the line-of-sight origin, which may be {@code null}
+     * @param weapon         the firing weapon
+     * @param target         the target of the attack
+     * @param eiSystemStatus the attacker's EI cockpit status used when computing LOS modifiers
+     * @param underWater     whether the weapon is firing under water
+     * @param baseLosMods    the terrain LOS modifiers computed at the normal firing height
+     *
+     * @return the elevated line of sight and its modifiers when the quirk applies and the elevated line of sight is not
+     *       blocked; otherwise {@code null}, meaning the normal line of sight should be used unchanged
+     */
+    private static @Nullable OverheadArmsLos overheadArmsLos(Game game, Entity weaponEntity,
+          @Nullable Entity attacker, WeaponMounted weapon, Targetable target, int eiSystemStatus,
+          boolean underWater, ToHitData baseLosMods) {
+        if (!(weaponEntity instanceof Mek mek) || !mek.hasQuirk(OptionsConstants.QUIRK_POS_OVERHEAD_ARMS)) {
+            return null;
+        }
+        if (mek.isProne()) {
+            logger.debug("[OverheadArms] {}: quirk inactive - Mek is prone", mek.getShortName());
+            return null;
+        }
+        int weaponLocation = weapon.getLocation();
+        boolean armMounted = (weaponLocation == Mek.LOC_LEFT_ARM) || (weaponLocation == Mek.LOC_RIGHT_ARM);
+        if (!armMounted) {
+            return null;
+        }
+        // The quirk cannot grant line of sight that does not already exist (BMM p.85), so do nothing when
+        // the normal line of sight is already blocked.
+        if (baseLosMods.getValue() == TargetRoll.IMPOSSIBLE) {
+            logger.debug("[OverheadArms] {}: quirk inactive - no normal line of sight to elevate", mek.getShortName());
+            return null;
+        }
+        Coords firingPosition = weaponEntity.getWeaponFiringPosition(weapon);
+        int elevatedFiringHeight = weaponEntity.getWeaponFiringHeight(weapon) + 1;
+        LosEffects elevatedLos = LosEffects.calculateLOS(game, attacker, target, firingPosition,
+              target.getPosition(), elevatedFiringHeight, weaponEntity.getBoardId(), false);
+        ToHitData elevatedLosMods = elevatedLos.losModifiers(game, eiSystemStatus, underWater);
+        // A higher vantage point can never be more blocked than a lower one, but guard the result so the
+        // quirk can never turn an otherwise-legal shot into an impossible one.
+        if (elevatedLosMods.getValue() == TargetRoll.IMPOSSIBLE) {
+            return null;
+        }
+        logger.debug("[OverheadArms] {}: arm weapon in location {} - terrain LOS modifier recalculated one level "
+                    + "higher: +{} (normal) -> +{} (elevated)",
+              mek.getShortName(), weaponLocation, baseLosMods.getValue(), elevatedLosMods.getValue());
+        return new OverheadArmsLos(elevatedLos, elevatedLosMods);
     }
 
     /**
@@ -1314,6 +1393,50 @@ public class ComputeToHit {
     }
 
     /**
+     * Applies the firefighting engineer extras on top of the base fire-extinguisher to-hit (TO:AuE p.153): a +2 for
+     * fuel-fed flamer fires (the same penalty inferno fires already get, not stacking with it) and a cumulative -1 per
+     * consecutive turn the platoon has fought this hex, down to a minimum target number of 3. Does nothing unless the
+     * attacker is a firefighting engineer extinguishing a hex.
+     *
+     * @param toHit           the running fire-extinguisher to-hit (target number 8, +2 if already inferno)
+     * @param attackingEntity the attacking entity
+     * @param target          the hex being extinguished
+     * @param game            the current {@link Game}
+     */
+    private static void applyFirefightingEngineerModifiers(ToHitData toHit, Entity attackingEntity, Targetable target,
+          Game game) {
+        if (!attackingEntity.isFirefighter() || (target.getTargetType() != Targetable.TYPE_HEX_EXTINGUISH)) {
+            return;
+        }
+        Coords targetCoords = target.getPosition();
+        // Inferno fires already added +2 above; apply the same to fuel-fed flamer fires when not inferno.
+        // Label it as a flamer fire so the to-hit breakdown does not misreport a flamer fire as an inferno.
+        if (!game.getBoard(target).isInfernoBurning(targetCoords)
+              && game.getBoard(target).isFlamerStartedFire(targetCoords)) {
+            toHit.addModifier(2, Messages.getString("WeaponAttackAction.PutOutFlamerFire"));
+        }
+        // Multiple platoons combining into a single roll grant the lead platoon -1 each (TO:AuE p.153). Apply the
+        // penalties (above) before the reductions (here) so the running total honours the minimum target number 3.
+        int supportingPlatoons = FirefightingSupport.supportingPlatoons(game, attackingEntity, target);
+        if (supportingPlatoons > 0) {
+            int reduction = Math.min(supportingPlatoons, toHit.getValue() - 3);
+            if (reduction > 0) {
+                toHit.addModifier(-reduction, Messages.getString("WeaponAttackAction.FirefightSupport"));
+            }
+        }
+        // isFirefighter() is only ever true for ConvInfantry, which holds the consecutive-turn streak state.
+        if (attackingEntity instanceof ConvInfantry firefighter) {
+            int priorStreak = firefighter.getPriorFirefightStreak(targetCoords, game.getRoundCount());
+            if (priorStreak > 0) {
+                int reduction = Math.min(priorStreak, toHit.getValue() - 3);
+                if (reduction > 0) {
+                    toHit.addModifier(-reduction, Messages.getString("WeaponAttackAction.FirefightSustained"));
+                }
+            }
+        }
+    }
+
+    /**
      * If you're using a weapon that does something totally special and doesn't apply mods like everything else, look
      * here
      *
@@ -1370,6 +1493,21 @@ public class ComputeToHit {
                   game.getBoard(target).isInfernoBurning(target.getPosition())) {
                 toHit.addModifier(2, Messages.getString("WeaponAttackAction.PutOutInferno"));
             }
+            applyFirefightingEngineerModifiers(toHit, ae, target, game);
+            srt.setSpecialResolution(true);
+            return toHit;
+        }
+
+        // Firefighting engineers without a fire extinguisher weapon (e.g. an older platoon that predates the
+        // auto-equipped extinguisher) can still put out an adjacent burning hex with their own gear (TO:AuE
+        // p.153), firing their small arms at the hex. New platoons select the Fire Extinguisher weapon, which
+        // is handled by the F_EXTINGUISHER branch above; both paths apply the same modifiers.
+        if (ae.isFirefighter() && (target.getTargetType() == Targetable.TYPE_HEX_EXTINGUISH)) {
+            toHit = new ToHitData(8, Messages.getString("WeaponAttackAction.FireExt"));
+            if (game.getBoard(target).isInfernoBurning(target.getPosition())) {
+                toHit.addModifier(2, Messages.getString("WeaponAttackAction.PutOutInferno"));
+            }
+            applyFirefightingEngineerModifiers(toHit, ae, target, game);
             srt.setSpecialResolution(true);
             return toHit;
         }
@@ -1748,6 +1886,13 @@ public class ComputeToHit {
         ComputeAbilityMods.processAttackerSPAs(toHit, ae, te, weapon, game);
         ComputeAbilityMods.processDefenderSPAs(toHit, ae, te, game);
 
+        // The attacker's movement modifier applies to every direct-fire artillery attack that resolves here,
+        // including flak attacks against airborne VTOL/WiGE/aerospace targets (TO:AR corrected 7th printing,
+        // p.153). It is added here - after the ADA early return above (ADA falls through to the normal to-hit
+        // path, which already applies this modifier) and before the flak branch returns - so that each direct
+        // artillery path includes it exactly once.
+        toHit.append(Compute.getAttackerMovementModifier(game, ae.getId()));
+
         // If an airborne unit occupies the target hex, standard artillery ammo makes a
         // flak attack against it
         // TN is a flat 3 + the altitude mod + the attacker's weapon skill - 2 for Flak
@@ -1775,9 +1920,8 @@ public class ComputeToHit {
             }
         }
 
-        // All other direct fire artillery attacks
+        // All other direct fire artillery attacks (attacker movement modifier already appended above)
         toHit.addModifier(4, Messages.getString("WeaponAttackAction.DirectArty"));
-        toHit.append(Compute.getAttackerMovementModifier(game, ae.getId()));
         // without LOS, it is a short-range indirect attack that ignores LOS modifiers, TO:AR p.153
         if (!losMods.cannotSucceed()) {
             toHit.append(losMods);

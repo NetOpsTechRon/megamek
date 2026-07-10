@@ -1,6 +1,6 @@
 /*
   Copyright (C) 2000-2003 Ben Mazur (bmazur@sev.org)
- * Copyright (C) 2008-2025 The MegaMek Team. All Rights Reserved.
+ * Copyright (C) 2008-2026 The MegaMek Team. All Rights Reserved.
  *
  * This file is part of MegaMek.
  *
@@ -494,6 +494,10 @@ public abstract class Aero extends Entity implements IAero, IBomber {
             mp--;
         }
 
+        // Improved Magnetic Pulse (iATM IMP) missile Safe Thrust reduction (IO IMP rules). Zero for
+        // large craft, which never accumulate IMP hits, so they are unaffected as the rules require.
+        mp = Math.max(0, mp - getImpMpReduction());
+
         if (!mpCalculationSetting.ignoreGrounded() && !isAirborne()) {
             mp = isSpheroid() ? 0 : mp / 2;
         }
@@ -679,6 +683,7 @@ public abstract class Aero extends Entity implements IAero, IBomber {
         whoFirst = Compute.randomInt(500);
     }
 
+    @Deprecated(since = "0.51.0", forRemoval = true)
     public int getWhoFirst() {
         return whoFirst;
     }
@@ -1458,6 +1463,7 @@ public abstract class Aero extends Entity implements IAero, IBomber {
      *
      * @return BV Type Modifier.
      */
+    @Deprecated(since = "0.51.0", forRemoval = true)
     public double getBVTypeModifier() {
         return 1.2;
     }
@@ -1633,7 +1639,10 @@ public abstract class Aero extends Entity implements IAero, IBomber {
         if (isAirborne()) {
             return super.getRunMP(mpCalculationSetting);
         } else {
-            return super.getWalkMP(mpCalculationSetting);
+            // Grounded aero: no run multiplier; cap at the grounded walk MP. Use Aero.getWalkMP (not Entity's)
+            // so the spheroid-grounded -> 0 and aerodyne-grounded -> thrust/2 rule at line 497 is honored.
+            // See issue #8187: bypassing this gave grounded spheroid Dropships non-zero run MP.
+            return getWalkMP(mpCalculationSetting);
         }
     }
 
@@ -1828,11 +1837,6 @@ public abstract class Aero extends Entity implements IAero, IBomber {
             return (int) (rating / (int) weight) + 2;
         }
         return (getEngine().getRating() / (int) weight) + 2;
-    }
-
-    @Override
-    public boolean isNuclearHardened() {
-        return true;
     }
 
     @Override
@@ -2341,6 +2345,7 @@ public abstract class Aero extends Entity implements IAero, IBomber {
     /**
      * @return is the crew of this vessel protected from gravitational effects, see StratOps, pg. 36
      */
+    @Deprecated(since = "0.51.0", forRemoval = true)
     public boolean isCrewProtected() {
         return true;
     }
@@ -2473,11 +2478,6 @@ public abstract class Aero extends Entity implements IAero, IBomber {
     @Override
     public boolean isPrimitive() {
         return (getCockpitType() == Aero.COCKPIT_PRIMITIVE);
-    }
-
-    @Override
-    public String getLocationDamage(int loc) {
-        return "";
     }
 
     public String getCritDamageString() {
@@ -2794,6 +2794,7 @@ public abstract class Aero extends Entity implements IAero, IBomber {
     /**
      * @return number of marines assigned to a unit Used for abandoning a unit
      */
+    @Deprecated(since = "0.51.0", forRemoval = true)
     public int getMarineCount() {
         return 0;
     }

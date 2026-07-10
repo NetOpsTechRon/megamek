@@ -154,14 +154,14 @@ public class ComputeAttackerToHitMods {
         }
 
         // Infantry impaired by pheromone gas suffer +1 to-hit (IO pg 79)
-        if ((attacker instanceof Infantry infantry) && infantry.isPheromoneImpaired()) {
+        if ((attacker instanceof ConvInfantry infantry) && infantry.isPheromoneImpaired()) {
             toHit.addModifier(+1, Messages.getString("WeaponAttackAction.PheromoneImpaired"));
         }
 
         // Prosthetic enhancement melee weapons have +2 to-hit penalty (IO p.84)
         // Per IO p.83, maximum modifier is +2 regardless of number of melee enhancements
         // Only applies if the unit has the MD_PL_ENHANCED or MD_PL_I_ENHANCED ability
-        if (attacker instanceof Infantry infantry) {
+        if (attacker instanceof ConvInfantry infantry) {
             boolean hasMeleeEnhancement = infantry.hasProstheticMeleeEnhancement();
             boolean hasEnhancedAbility = infantry.hasAbility(OptionsConstants.MD_PL_ENHANCED)
                   || infantry.hasAbility(OptionsConstants.MD_PL_I_ENHANCED);
@@ -251,6 +251,17 @@ public class ComputeAttackerToHitMods {
         // Attacker affected by EMP mine interference
         if (attacker.getEMPInterferenceRounds() > 0) {
             toHit.addModifier(+2, Messages.getString("WeaponAttackAction.AeEMPInterference"));
+        }
+
+        // Attacker hit by Magnetic Pulse (MP) missiles (IO p.62) - flat +1, does not stack
+        if (attacker.getMagneticPulseRounds() > 0) {
+            toHit.addModifier(+1, Messages.getString("WeaponAttackAction.AeMagneticPulse"));
+        }
+
+        // Attacker hit by Improved Magnetic Pulse (iATM IMP) missiles - +1 per 3 hits, capped
+        int impToHitModifier = attacker.getImpToHitModifier();
+        if (impToHitModifier > 0) {
+            toHit.addModifier(impToHitModifier, Messages.getString("WeaponAttackAction.AeImprovedMagneticPulse"));
         }
 
         // Special Equipment that that attacker possesses

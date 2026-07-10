@@ -55,20 +55,15 @@ import megamek.common.equipment.*;
 import megamek.common.equipment.enums.MiscTypeFlag;
 import megamek.common.interfaces.ITechManager;
 import megamek.common.options.OptionsConstants;
-import megamek.common.units.BipedMek;
 import megamek.common.units.Entity;
 import megamek.common.units.LandAirMek;
 import megamek.common.units.Mek;
+import megamek.common.units.MekConstructionUtil;
 import megamek.common.units.QuadMek;
 import megamek.common.units.QuadVee;
 import megamek.common.util.StringUtil;
 import megamek.common.weapons.artillery.ArtilleryWeapon;
-import megamek.common.weapons.autoCannons.ACWeapon;
-import megamek.common.weapons.autoCannons.LBXACWeapon;
-import megamek.common.weapons.autoCannons.UACWeapon;
-import megamek.common.weapons.gaussRifles.GaussWeapon;
 import megamek.common.weapons.lasers.EnergyWeapon;
-import megamek.common.weapons.ppc.PPCWeapon;
 
 /**
  * @author Reinhard Vicinus
@@ -116,6 +111,29 @@ public class TestMek extends TestEntity {
     private static Structure getStructure(Mek mek) {
         int type = mek.getStructureType();
         return new Structure(type, mek.isSuperHeavy(), mek.getMovementMode());
+    }
+
+    @Override
+    public double getWeightStructure() {
+        if (!mek.isFrankenMek()) {
+            return super.getWeightStructure();
+        }
+        double structureWeight = 0;
+        for (int loc = 0; loc < mek.locations(); loc++) {
+            double fraction = mek.getFrankenMekStructureWeightFraction(loc);
+            if (fraction <= 0) {
+                continue;
+            }
+            int donorTonnage = mek.getFrankenMekStructureTonnage(loc);
+            double fullMekStructureWeight = Structure.getWeightStructure(
+                  mek.getFrankenMekStructureType(loc),
+                  donorTonnage,
+                  Ceil.HALF_TON,
+                  donorTonnage > 100,
+                  mek.getMovementMode());
+            structureWeight += fullMekStructureWeight * fraction;
+        }
+        return TestEntity.ceil(structureWeight, Ceil.HALF_TON);
     }
 
     public static Integer maxJumpMP(Mek mek) {
@@ -302,6 +320,7 @@ public class TestMek extends TestEntity {
         return location == Mek.LOC_HEAD;
     }
 
+    @Deprecated(since = "0.51.0", forRemoval = true)
     public boolean isEngineLocation(int location) {
         return mek.hasSystem(Mek.SYSTEM_ENGINE, location);
     }
@@ -411,6 +430,7 @@ public class TestMek extends TestEntity {
         return true;
     }
 
+    @Deprecated(since = "0.51.0", forRemoval = true)
     public boolean criticalSlotsAllocated(Entity entity, Mounted<?> mounted, Vector<Serializable> allocation,
           StringBuffer buff) {
         int location = mounted.getLocation();
@@ -472,8 +492,7 @@ public class TestMek extends TestEntity {
         for (Mounted<?> m : mek.getEquipment()) {
             int loc = m.getLocation();
             if (loc == Entity.LOC_NONE) {
-                if ((m.getType() instanceof AmmoType)
-                      && (m.getUsableShotsLeft() <= 1)) {
+                if ((m.getType() instanceof AmmoType) && (m.getUsableShotsLeft() <= 1)) {
                     continue;
                 }
                 if (m.getNumCriticalSlots() == 0) {
@@ -492,33 +511,17 @@ public class TestMek extends TestEntity {
                     continue;
                 }
             }
-            // Check for illegal allocations
-            if (mek.isOmni()
-                  && (mek instanceof BipedMek)
-                  && ((loc == Mek.LOC_LEFT_ARM) || (loc == Mek.LOC_RIGHT_ARM))
-                  && ((m.getType() instanceof GaussWeapon)
-                  || (m.getType() instanceof ACWeapon)
-                  || (m.getType() instanceof UACWeapon)
-                  || (m.getType() instanceof LBXACWeapon)
-                  || (m.getType() instanceof PPCWeapon))) {
-                String weapon = "";
-                if (m.getType() instanceof GaussWeapon) {
-                    weapon = "gauss rifles";
-                } else if ((m.getType() instanceof ACWeapon)
-                      || (m.getType() instanceof UACWeapon)
-                      || (m.getType() instanceof LBXACWeapon)) {
-                    weapon = "autocannons";
-                } else if (m.getType() instanceof PPCWeapon) {
-                    weapon = "PPCs";
-                }
-                if (mek.hasSystem(Mek.ACTUATOR_LOWER_ARM, loc)
-                      || mek.hasSystem(Mek.ACTUATOR_HAND, loc)) {
-                    buff.append("Omni meks with arm mounted ").append(weapon)
-                          .append(" cannot have lower armor or hand actuators!\n");
+
+            // TM p.57
+            if (mek.isOmni() && mek.isArm(loc) && MekConstructionUtil.removesHandAndLowerArmSlotsOnOmni(m.getType())) {
+                if (mek.hasSystem(Mek.ACTUATOR_LOWER_ARM, loc) || mek.hasSystem(Mek.ACTUATOR_HAND, loc)) {
+                    buff.append("Omni meks with arm mounted gauss weapons, PPCs or "
+                          + "ACs cannot have lower armor or hand actuators!\n");
                     legal = false;
                 }
             }
         }
+
         if ((countInternalHeatSinks > engine.integralHeatSinkCapacity(this.mek.hasCompactHeatSinks()))
               || ((countInternalHeatSinks < engine.integralHeatSinkCapacity(this.mek.hasCompactHeatSinks()))
               && (countInternalHeatSinks != mek.heatSinks(false))
@@ -564,6 +567,74 @@ public class TestMek extends TestEntity {
             correct = false;
         }
         return correct;
+    }
+
+    private int countInternalStructureCriticalSlots(Mek mek, int location) {
+        int count = 0;
+        for (int slot = 0; slot < mek.getNumberOfCriticalSlots(location); slot++) {
+            CriticalSlot criticalSlot = mek.getCritical(location, slot);
+            if (criticalSlot == null) {
+                continue;
+            }
+            EquipmentType equipmentType = mek.getEquipmentType(criticalSlot);
+            if ((equipmentType != null) && EquipmentType.isStructureType(equipmentType)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private boolean correctFrankenMekInternalStructureCrits(StringBuffer buff) {
+        boolean illegal = false;
+        for (int location = 0; location < mek.locations(); location++) {
+            EquipmentType structure = mek.getFrankenMekStructureEquipment(location);
+            // does this structure type even take up slots in the first place
+            boolean structureUsesSlots = structure != null && structure.getNumCriticalSlots(mek) > 0;
+
+            int actualStructureCrits = countInternalStructureCriticalSlots(mek, location);
+            int actualMatchingStructureCrits = structure == null ? 0 : mek.getNumberOfCriticalSlots(structure, location);
+            boolean hasOnlyMatchingStructureCrits = actualStructureCrits == actualMatchingStructureCrits;
+
+            boolean validStructureCrits = structureUsesSlots
+                  ? hasOnlyMatchingStructureCrits
+                  : actualStructureCrits == 0;
+            if (!validStructureCrits) {
+                buff.append("The FrankenMek internal structure of ")
+                      .append(mek.getLocationName(location))
+                      .append(" has crit slots that do not match the configured structure type\n");
+                illegal = true;
+            }
+        }
+        return illegal;
+    }
+
+    private boolean correctFrankenMekConfiguration(StringBuffer buff) {
+        boolean illegal = false;
+        if (mek.isOmni()) {
+            buff.append("FrankenMeks cannot be OmniMeks\n");
+            illegal = true;
+        }
+        int centerTorsoTonnage = mek.getFrankenMekStructureTonnage(Mek.LOC_CENTER_TORSO);
+        for (int location = 0; location < mek.locations(); location++) {
+            if (location == Mek.LOC_CENTER_TORSO) {
+                continue;
+            }
+            int locationTonnage = mek.getFrankenMekStructureTonnage(location);
+            if ((centerTorsoTonnage <= 100) && (locationTonnage > 100)) {
+                buff.append("The FrankenMek structure tonnage of ")
+                      .append(mek.getLocationName(location))
+                      .append(" exceeds 100 while the center torso is 100 tons or less\n");
+                illegal = true;
+            }
+            if (mek.locationIsLeg(location)
+                  && (locationTonnage < centerTorsoTonnage)) {
+                buff.append("The FrankenMek structure tonnage of ")
+                      .append(mek.getLocationName(location))
+                      .append(" is lower than the center torso\n");
+                illegal = true;
+            }
+        }
+        return illegal;
     }
 
     private boolean checkSystemCriticalSlots(StringBuffer buff) {
@@ -617,7 +688,8 @@ public class TestMek extends TestEntity {
                 }
 
             } else if ((mek.getOArmor(loc) + (mek.hasRearArmor(loc) ? mek
-                  .getOArmor(loc, true) : 0)) > (2 * mek.getOInternal(loc))) {
+                                                                      .getOArmor(loc, true) : 0)) > (2
+                  * mek.getOInternal(loc))) {
                 buff.append(printArmorLocation(loc))
                       .append(printArmorLocProp(loc,
                             2 * mek.getOInternal(loc)))
@@ -664,8 +736,6 @@ public class TestMek extends TestEntity {
         }
 
         if (!allowOverweightConstruction() && !correctWeight(stringBuffer)) {
-            stringBuffer.insert(0, printTechLevel() + printShortMovement());
-            stringBuffer.append(printWeightCalculation());
             correct = false;
         }
         if (!engine.engineValid) {
@@ -718,7 +788,7 @@ public class TestMek extends TestEntity {
         buff.append("Intro year: ").append(mek.getYear()).append("\n");
         buff.append(printSource());
         buff.append(printShortMovement());
-        if (correctWeight(buff, true, true)) {
+        if (correctWeight(buff, false, false)) {
             buff.append("Weight: ").append(getWeight()).append(" (")
                   .append(calculateWeight()).append(")\n");
         }
@@ -968,13 +1038,14 @@ public class TestMek extends TestEntity {
                     buff.append(misc.getName()).append(" can only be mounted on a quad mek.\n");
                     illegal = true;
                 }
-                if (!mek.hasReinforcedStructure()) {
-                    buff.append(misc.getName()).append(" requires reinforced structure.\n");
-                    illegal = true;
-                }
                 for (int loc = 0; loc < mek.locations(); loc++) {
-                    if (mek.locationIsTorso(loc)
-                          && countCriticalSlotsFromEquipInLocation(mek, m, loc) != 1) {
+                    if (!mek.locationIsTorso(loc)) continue;
+                    if (!mek.hasReinforcedStructure(loc)) {
+                        illegal = true;
+                        buff.append(misc.getName()).append(" requires reinforced structure in each torso location.\n");
+                        break;
+                    }
+                    if (countCriticalSlotsFromEquipInLocation(mek, m, loc) != 1) {
                         illegal = true;
                         buff.append(misc.getName()).append(" requires one critical slot in each torso location.\n");
                         break;
@@ -1043,6 +1114,15 @@ public class TestMek extends TestEntity {
                   && misc.hasFlag(MiscTypeFlag.S_BACKHOE)
                   || misc.hasFlag(MiscTypeFlag.S_COMBINE)))) {
                 buff.append("LAMs may not mount ").append(misc.getName()).append("\n");
+                illegal = true;
+            }
+
+            // TM p.242 / TW: only quad BattleMeks and quad IndustrialMeks may mount a bridgelayer.
+            if ((misc.hasFlag(MiscType.F_LIGHT_BRIDGE_LAYER)
+                  || misc.hasFlag(MiscType.F_MEDIUM_BRIDGE_LAYER)
+                  || misc.hasFlag(MiscType.F_HEAVY_BRIDGE_LAYER))
+                  && !mek.isQuadMek()) {
+                buff.append("Only quad meks may mount ").append(misc.getName()).append("\n");
                 illegal = true;
             }
 
@@ -1457,13 +1537,18 @@ public class TestMek extends TestEntity {
         // fully loaded unit in MML and
         // will make units appear invalid during loading (MML calls
         // UnitUtil.expandUnitMounts() after loading)
-        String structureName = EquipmentType.getStructureTypeName(mek.getStructureType(),
-              TechConstants.isClan(mek.getStructureTechLevel()));
-        EquipmentType structure = EquipmentType.get(structureName);
-        int requiredStructureCrits = structure.getNumCriticalSlots(mek);
-        if (mek.getNumberOfCriticalSlots(structure) != requiredStructureCrits) {
-            buff.append("The internal structure of this mek is not using the correct number of crit slots\n");
-            illegal = true;
+        if (mek.isFrankenMek()) {
+            illegal |= correctFrankenMekConfiguration(buff);
+            illegal |= correctFrankenMekInternalStructureCrits(buff);
+        } else {
+            String structureName = EquipmentType.getStructureTypeName(mek.getStructureType(),
+                  TechConstants.isClan(mek.getStructureTechLevel()));
+            EquipmentType structure = EquipmentType.get(structureName);
+            int requiredStructureCrits = structure.getNumCriticalSlots(mek);
+            if (mek.getNumberOfCriticalSlots(structure) != requiredStructureCrits) {
+                buff.append("The internal structure of this mek is not using the correct number of crit slots\n");
+                illegal = true;
+            }
         }
 
         if (hasPartialWing && hasMekJumpBooster) {
@@ -1621,6 +1706,17 @@ public class TestMek extends TestEntity {
                 }
                 return false;
             }
+            // TM p.242 / TW: only quad BattleMeks/IndustrialMeks may mount a bridgelayer, so it has no valid location
+            // on any other mek (this blocks placement in MML/construction, not just flags the finished unit invalid).
+            if ((eq.hasFlag(MiscType.F_LIGHT_BRIDGE_LAYER)
+                  || eq.hasFlag(MiscType.F_MEDIUM_BRIDGE_LAYER)
+                  || eq.hasFlag(MiscType.F_HEAVY_BRIDGE_LAYER))
+                  && !mek.isQuadMek()) {
+                if (buffer != null) {
+                    buffer.append(eq.getName()).append(" may only be mounted on a quad mek.\n");
+                }
+                return false;
+            }
             if ((eq.hasFlag(MiscType.F_FUEL) || eq.is(EquipmentTypeLookup.IS_CASE)
                   || eq.is(EquipmentTypeLookup.IS_CASE_P)
                   || eq.hasFlag(MiscType.F_LADDER) || eq.hasFlag(MiscType.F_LIGHT_BRIDGE_LAYER)
@@ -1680,5 +1776,15 @@ public class TestMek extends TestEntity {
             }
         }
         return true;
+    }
+
+    @Override
+    public boolean correctWeight(StringBuffer buff, boolean ignoreOverweight, boolean ignoreUnderweight) {
+        boolean isCorrect = true;
+        if (getWeight() % 5 != 0) {
+            buff.append("Mek weight must be a multiple of 5 tons\n"); // TM p.45, TO:AUE p.190, IO:AE p.154
+            isCorrect = false;
+        }
+        return isCorrect && super.correctWeight(buff, ignoreOverweight, ignoreUnderweight);
     }
 }
