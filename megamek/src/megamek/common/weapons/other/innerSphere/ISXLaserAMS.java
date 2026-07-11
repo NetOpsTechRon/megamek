@@ -71,7 +71,7 @@ public class ISXLaserAMS extends LaserWeapon {
         maxRange = RANGE_LONG;
         shortAV = 3;
         ammoType = AmmoType.AmmoTypeEnum.NA;
-        tonnage = 0.5;
+        tonnage = 1;
         criticalSlots = 1;
         bv = 45;
         atClass = CLASS_AMS;

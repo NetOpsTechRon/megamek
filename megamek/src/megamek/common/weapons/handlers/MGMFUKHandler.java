@@ -96,7 +96,7 @@ public class MGMFUKHandler extends AmmoWeaponHandler {
             // if this is a fighter squadron, we need to account for the number of weapons should default to one for
             // non-squadrons
             for (int i = 0; i < numWeaponsHit; i++) {
-                extraHeat += (2);
+                extraHeat += (1);
             }
 
             if (entityTarget.getArmor(hit) > 0

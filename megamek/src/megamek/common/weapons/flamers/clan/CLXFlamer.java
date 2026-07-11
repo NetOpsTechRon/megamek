@@ -57,7 +57,7 @@ public class CLXFlamer extends FlamerWeapon {
         this.setInternalName("CLXFlamer");
         this.addLookupName("Clan Flamer (X)");
         flags = flags.or(WeaponType.F_X_FLAMER);
-        this.heat = 2;
+        this.heat = 3;
         this.damage = 2;
         this.infDamageClass = WeaponType.WEAPON_BURST_6D6;
         this.shortRange = 3;
@@ -66,8 +66,8 @@ public class CLXFlamer extends FlamerWeapon {
         this.extremeRange = 12;
         this.tonnage = 0.5;
         this.criticalSlots = 1;
-        this.bv = 6;
-        this.cost = 7500;
+        this.bv = 16;
+        this.cost = 15000;
         this.shortAV = 2;
         this.maxRange = RANGE_SHORT;
         this.atClass = CLASS_POINT_DEFENSE;

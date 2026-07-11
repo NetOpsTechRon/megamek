@@ -55,8 +55,8 @@ public class CLXPlasmaRifle extends PlasmaMFUKWeapon {
         super();
         name = "Plasma Rifle (X)";
         setInternalName("CLXPlasmaRifle");
-        heat = 10;
-        damage = 10;
+        heat = 15;
+        damage = 15;
         rackSize = 1;
         minimumRange = 0;
         shortRange = 10;
@@ -68,8 +68,8 @@ public class CLXPlasmaRifle extends PlasmaMFUKWeapon {
         waterLongRange = 16;
         waterExtremeRange = 24;
         tonnage = 5.0;
-        criticalSlots = 1;
-        bv = 300;
+        criticalSlots = 2;
+        bv = 412;
         cost = 300000;
         shortAV = 10;
         medAV = 10;
