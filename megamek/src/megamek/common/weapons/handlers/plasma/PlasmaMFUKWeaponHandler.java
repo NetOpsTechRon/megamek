@@ -247,7 +247,7 @@ public class PlasmaMFUKWeaponHandler extends EnergyWeaponHandler {
 
     @Override
     protected void handleBuildingDamage(Vector<Report> vPhaseReport, IBuilding bldg, int nDamage, Coords coords) {
-        // Plasma weapons deal quad damage to buildings.
-        super.handleBuildingDamage(vPhaseReport, bldg, nDamage * 4, coords);
+        // Plasma weapons deal 10x damage to buildings.
+        super.handleBuildingDamage(vPhaseReport, bldg, nDamage * 10, coords);
     }
 }

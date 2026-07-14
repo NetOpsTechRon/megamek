@@ -67,7 +67,7 @@ public class CLXPlasmaRifle extends PlasmaMFUKWeapon {
         waterMediumRange = 12;
         waterLongRange = 18;
         waterExtremeRange = 24;
-        tonnage = 5.0;
+        tonnage = 6.0;
         criticalSlots = 2;
         bv = 412;
         cost = 300000;

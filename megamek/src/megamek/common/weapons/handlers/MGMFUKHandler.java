@@ -43,6 +43,7 @@ import megamek.common.RangeType;
 import megamek.common.Report;
 import megamek.common.ToHitData;
 import megamek.common.actions.WeaponAttackAction;
+import megamek.common.board.Coords;
 import megamek.common.compute.Compute;
 import megamek.common.equipment.AmmoMounted;
 import megamek.common.equipment.ArmorType;
@@ -96,7 +97,7 @@ public class MGMFUKHandler extends AmmoWeaponHandler {
             // if this is a fighter squadron, we need to account for the number of weapons should default to one for
             // non-squadrons
             for (int i = 0; i < numWeaponsHit; i++) {
-                extraHeat += (1);
+                extraHeat += (2);
             }
 
             if (entityTarget.getArmor(hit) > 0
@@ -129,6 +130,12 @@ public class MGMFUKHandler extends AmmoWeaponHandler {
             }
             vPhaseReport.addElement(report);
         }
+    }
+
+    @Override
+    protected void handleBuildingDamage(Vector<Report> vPhaseReport, IBuilding bldg, int nDamage, Coords coords) {
+        // MG weapons deal 20x damage to buildings.
+        super.handleBuildingDamage(vPhaseReport, bldg, nDamage * 20, coords);
     }
 
     @Override
