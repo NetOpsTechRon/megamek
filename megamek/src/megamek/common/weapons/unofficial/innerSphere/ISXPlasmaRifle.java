@@ -54,18 +54,18 @@ public class ISXPlasmaRifle extends megamek.common.weapons.unofficial.PlasmaMFUK
         damage = 10;
         rackSize = 1;
         minimumRange = 0;
-        shortRange = 6;
-        mediumRange = 12;
-        longRange = 18;
-        extremeRange = 24;
+        shortRange = 7;
+        mediumRange = 14;
+        longRange = 23;
+        extremeRange = 34;
         waterShortRange = 6;
         waterMediumRange = 12;
         waterLongRange = 18;
         waterExtremeRange = 24;
         tonnage = 7.0;
         criticalSlots = 3;
-        bv = 176;
-        cost = 200000;
+        bv = 229;
+        cost = 300000;
         shortAV = 10;
         medAV = 10;
         maxRange = RANGE_LONG;
@@ -75,7 +75,7 @@ public class ISXPlasmaRifle extends megamek.common.weapons.unofficial.PlasmaMFUK
               .setUnofficial(false)
               .setTechRating(TechRating.E)
               .setAvailability(AvailabilityValue.X, AvailabilityValue.X, AvailabilityValue.E, AvailabilityValue.D)
-              .setISAdvancement(3045, 3048, 3050, DATE_NONE, DATE_NONE)
+              .setISAdvancement(3040, 3048, 3050, DATE_NONE, DATE_NONE)
               .setISApproximate(true, false, false, false, false)
               .setPrototypeFactions(megamek.common.enums.Faction.FS)
               .setProductionFactions(megamek.common.enums.Faction.FS);

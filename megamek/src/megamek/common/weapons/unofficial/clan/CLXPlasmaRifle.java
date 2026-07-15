@@ -55,8 +55,8 @@ public class CLXPlasmaRifle extends PlasmaMFUKWeapon {
         super();
         name = "Plasma Rifle (X)";
         setInternalName("CLXPlasmaRifle");
-        heat = 15;
-        damage = 15;
+        heat = 10;
+        damage = 10;
         rackSize = 1;
         minimumRange = 0;
         shortRange = 7;
@@ -69,7 +69,7 @@ public class CLXPlasmaRifle extends PlasmaMFUKWeapon {
         waterExtremeRange = 24;
         tonnage = 6.0;
         criticalSlots = 2;
-        bv = 412;
+        bv = 272;
         cost = 300000;
         shortAV = 10;
         medAV = 10;
@@ -80,7 +80,7 @@ public class CLXPlasmaRifle extends PlasmaMFUKWeapon {
               .setUnofficial(false)
               .setTechRating(TechRating.E)
               .setAvailability(AvailabilityValue.X, AvailabilityValue.X, AvailabilityValue.E, AvailabilityValue.D)
-              .setClanAdvancement(3045, 3048, 3050, DATE_NONE, DATE_NONE)
+              .setClanAdvancement(3040, 3048, 3050, DATE_NONE, DATE_NONE)
               .setClanApproximate(true, false, false, false, false)
               .setPrototypeFactions(Faction.CSF)
               .setProductionFactions(Faction.CSF);
