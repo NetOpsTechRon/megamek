@@ -3855,7 +3855,7 @@ public class MiscType extends EquipmentType {
 
         misc.name = "Mace";
         misc.setInternalName(misc.name);
-        misc.addLookupName("THB Mace");
+        misc.addLookupName("Mace (THB)");
         misc.tonnage = TONNAGE_VARIABLE;
         misc.criticalSlots = CRITICAL_SLOTS_VARIABLE;
         misc.cost = 130000;
@@ -5766,7 +5766,7 @@ public class MiscType extends EquipmentType {
         MiscType misc = new MiscType();
 
         // Don't forget, this will eventually count double for ECCM.
-        misc.name = "THB Angel ECM Suite";
+        misc.name = "Angel ECM Suite (THB)";
         misc.setInternalName("ISTHBAngelECMSuite");
         misc.addLookupName("IS THB Angel ECM Suite");
         misc.addLookupName("ISTHBAngelECM");
