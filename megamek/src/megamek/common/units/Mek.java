@@ -2048,7 +2048,7 @@ public abstract class Mek extends Entity implements Fortifiable, RubbleClearer {
                   + (hasEngine() ? getEngine().getJumpHeat((movedMP / 2) + (movedMP % 2)) : 0);
             case JUMP_PROTOTYPE_IMPROVED ->
                 // min 6 heat, otherwise 2xJumpMp, XTRO:Succession Wars pg17
-                  extra + (hasEngine() ? Math.max(6, getEngine().getJumpHeat(movedMP * 2)) : 0);
+                  + (hasEngine() ? getEngine().getJumpHeat((movedMP / 2) + (movedMP % 2)) : 0);
             case JUMP_DISPOSABLE -> extra;
             case JUMP_NONE -> 0;
             default -> extra + (hasEngine() ? getEngine().getJumpHeat(movedMP) : 0);

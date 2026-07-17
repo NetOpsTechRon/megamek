@@ -864,7 +864,7 @@ public class MiscType extends EquipmentType {
             multiplier = 2.0;
         }
         if (hasFlag(MiscTypeFlag.S_PROTOTYPE) && hasFlag(MiscTypeFlag.S_IMPROVED)) {
-            multiplier = 1.0;
+            multiplier = 0.5;
         }
         if (hasFlag(F_PROTOMEK_EQUIPMENT)) {
             if (unitTonnage < 6) {
@@ -1101,7 +1101,7 @@ public class MiscType extends EquipmentType {
                 if ((entity instanceof Mek) && entity.isSuperHeavy()) {
                     return 4;
                 } else {
-                    return 7;
+                    return 4;
                 }
             } else if (entity.hasPatchworkArmor()) {
                 int slots = 0;
@@ -1124,7 +1124,7 @@ public class MiscType extends EquipmentType {
                 if ((entity instanceof Mek) && entity.isSuperHeavy()) {
                     return 7;
                 } else {
-                    return 14;
+                    return 7;
                 }
             }
         } else if (hasFlag(MiscType.F_REFLECTIVE)) {
@@ -1132,7 +1132,7 @@ public class MiscType extends EquipmentType {
                 if ((entity instanceof Mek) && entity.isSuperHeavy()) {
                     return 3;
                 } else {
-                    return 5;
+                    return 3;
                 }
             } else if (entity.hasPatchworkArmor()) {
                 int slots = 0;
@@ -1154,14 +1154,14 @@ public class MiscType extends EquipmentType {
             if ((entity instanceof Mek) && entity.isSuperHeavy()) {
                 return 5;
             } else {
-                return 10;
+                return 5;
             }
         } else if (hasFlag(MiscType.F_LIGHT_FERRO)) {
             if (!entity.hasPatchworkArmor()) {
                 if ((entity instanceof Mek) && entity.isSuperHeavy()) {
                     return 4;
                 } else {
-                    return 7;
+                    return 4;
                 }
             } else {
                 int slots = 0;
@@ -1181,7 +1181,7 @@ public class MiscType extends EquipmentType {
                 if ((entity instanceof Mek) && entity.isSuperHeavy()) {
                     return 11;
                 } else {
-                    return 21;
+                    return 11;
                 }
             } else {
                 int slots = 0;
@@ -1201,7 +1201,7 @@ public class MiscType extends EquipmentType {
                 if ((entity instanceof Mek) && entity.isSuperHeavy()) {
                     return 6;
                 } else {
-                    return 12;
+                    return 6;
                 }
             } else {
                 int slots = 0;
@@ -1221,7 +1221,7 @@ public class MiscType extends EquipmentType {
                 if ((entity instanceof Mek) && entity.isSuperHeavy()) {
                     return 8;
                 } else {
-                    return 16;
+                    return 8;
                 }
             } else {
                 int slots = 0;
@@ -1240,13 +1240,13 @@ public class MiscType extends EquipmentType {
             if ((entity instanceof Mek) && entity.isSuperHeavy()) {
                 return 3;
             } else {
-                return 6;
+                return 3;
             }
         } else if (hasFlag(MiscType.F_BALLISTIC_REINFORCED) || hasFlag(MiscType.F_IMPACT_RESISTANT)) {
             if ((entity instanceof Mek) && entity.isSuperHeavy()) {
                 return 5;
             } else {
-                return 10;
+                return 5;
             }
         } else if (hasFlag(F_JUMP_BOOSTER) || hasFlag(F_TALON)) {
             return (entity instanceof QuadMek) ? 8 : 4; // all slots in all
@@ -1281,15 +1281,15 @@ public class MiscType extends EquipmentType {
             if (entity.isSuperHeavy()) {
                 return isClan() ? 4 : 7;
             } else {
-                return isClan() ? 7 : 14;
+                return isClan() ? 4 : 7;
             }
         } else if (hasFlag(F_ENDO_STEEL_PROTO)) {
-            return entity.isSuperHeavy() ? 8 : 16;
+            return entity.isSuperHeavy() ? 4 : 8;
         } else if (hasFlag(F_ENDO_COMPOSITE)) {
             if (entity.isSuperHeavy()) {
                 return isClan() ? 2 : 4;
             } else {
-                return isClan() ? 4 : 7;
+                return isClan() ? 2 : 4;
             }
         } else if (hasFlag(F_FUEL)) {
             return (int) Math.ceil(getTonnage(entity));
@@ -1903,20 +1903,20 @@ public class MiscType extends EquipmentType {
         misc.tonnage = TONNAGE_VARIABLE;
         misc.criticalSlots = 1;
         misc.tankSlots = 0;
-        misc.explosive = true;
         misc.flags = misc.flags.or(F_JUMP_JET, F_MEK_EQUIPMENT, MiscTypeFlag.S_IMPROVED,
               MiscTypeFlag.S_PROTOTYPE);
         misc.bv = 0;
         misc.rulesRefs = "17,XTRO:SW1";
         // Not included in IO Progression data based on original source.
         misc.techAdvancement.setTechBase(TechBase.IS)
-              .setISAdvancement(3020, DATE_NONE, DATE_NONE, 3069)
+              .setISAdvancement(3000, 3005, 3010, DATE_NONE)
               .setISApproximate(true, false, false, false, false)
+              .setClanAdvancement(3000, 3005, 3010, DATE_NONE)
+              .setClanApproximate(true, false, false, false, false)
               .setPrototypeFactions(Faction.FS)
               .setProductionFactions(Faction.FS)
               .setTechRating(TechRating.E)
-              .setAvailability(AvailabilityValue.X, AvailabilityValue.F, AvailabilityValue.F, AvailabilityValue.X)
-              .setStaticTechLevel(SimpleTechLevel.EXPERIMENTAL);
+              .setAvailability(AvailabilityValue.X, AvailabilityValue.X, AvailabilityValue.E, AvailabilityValue.D);
         return misc;
     }
 
