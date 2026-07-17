@@ -875,7 +875,7 @@ public class MiscType extends EquipmentType {
             multiplier = 2.0;
         }
         if (hasFlag(MiscTypeFlag.S_PROTOTYPE) && hasFlag(MiscTypeFlag.S_IMPROVED)) {
-            multiplier = 0.5;
+            multiplier = 0.25;
         }
         if (hasFlag(F_PROTOMEK_EQUIPMENT)) {
             if (unitTonnage < 6) {
@@ -1541,7 +1541,6 @@ public class MiscType extends EquipmentType {
         EquipmentType.addType(MiscType.createVehicularJumpJet());
         EquipmentType.addType(MiscType.createJumpBooster());
         EquipmentType.addType(MiscType.createISEndoSteelPrototype());
-        EquipmentType.addType(MiscType.createCLEndoSteelPrototype());
         EquipmentType.addType(MiscType.createReinforcedStructure());
         EquipmentType.addType(MiscType.createISCompositeStructure());
         EquipmentType.addType(MiscType.createIndustrialStructure());
@@ -5495,7 +5494,7 @@ public class MiscType extends EquipmentType {
         misc.addLookupName("THB Bloodhound Active Probe");
         misc.addLookupName("ISTHBBloodhoundActiveProbe");
         misc.addLookupName("IS THB Bloodhound Active Probe");
-        misc.tonnage = 0.5;
+        misc.tonnage = 0.25;
         misc.criticalSlots = 1;
         misc.cost = 750000;
         misc.flags = misc.flags.or(F_BAP,
@@ -5770,7 +5769,7 @@ public class MiscType extends EquipmentType {
         misc.setInternalName("ISTHBAngelECMSuite");
         misc.addLookupName("IS THB Angel ECM Suite");
         misc.addLookupName("ISTHBAngelECM");
-        misc.tonnage = 0.5f;
+        misc.tonnage = 0.25f;
         misc.criticalSlots = 1;
         misc.cost = 1000000;
         misc.flags = misc.flags.or(F_ECM,
@@ -9119,10 +9118,10 @@ public class MiscType extends EquipmentType {
 
         misc.name = EquipmentType.getStructureTypeName(T_STRUCTURE_ENDO_PROTOTYPE);
         misc.setInternalName(EquipmentType.getStructureTypeName(T_STRUCTURE_ENDO_PROTOTYPE, false));
-        misc.addLookupName("IS Endo Steel Prototype");
-        misc.addLookupName("IS Endo-Steel Prototype");
-        misc.addLookupName("IS Endo Steel Prototype Structure");
-        misc.addLookupName("IS Endo-Steel Prototype Structure");
+        misc.addLookupName("Endo Steel Prototype");
+        misc.addLookupName("Endo-Steel Prototype");
+        misc.addLookupName("Endo Steel Prototype Structure");
+        misc.addLookupName("Endo-Steel Prototype Structure");
         misc.tonnage = TONNAGE_VARIABLE;
         misc.criticalSlots = CRITICAL_SLOTS_VARIABLE;
         misc.hittable = false;
@@ -9131,44 +9130,18 @@ public class MiscType extends EquipmentType {
         misc.omniFixedOnly = true;
         misc.bv = 0;
         misc.rulesRefs = "65, IO:AE";
-        misc.techAdvancement.setTechBase(TechBase.IS)
+        misc.techAdvancement.setTechBase(TechBase.ALL)
               .setIntroLevel(false)
               .setUnofficial(false)
               .setTechRating(TechRating.E)
-              .setAvailability(AvailabilityValue.D, AvailabilityValue.F, AvailabilityValue.E, AvailabilityValue.D)
-              .setISAdvancement(2480, 2487, 3040, 2850, 3035)
-              .setISApproximate(true, false, false, false, false)
-              .setPrototypeFactions(Faction.TH)
-              .setReintroductionFactions(Faction.DC);
-        return misc;
-    }
-
-    public static StructureType createCLEndoSteelPrototype() {
-        StructureType misc = new StructureType(T_STRUCTURE_ENDO_PROTOTYPE);
-        misc.name = EquipmentType.getStructureTypeName(T_STRUCTURE_ENDO_PROTOTYPE);
-        misc.setInternalName(EquipmentType.getStructureTypeName(T_STRUCTURE_ENDO_PROTOTYPE, true));
-        misc.addLookupName("Clan Endo-Steel Prototype");
-        misc.addLookupName("Clan EndoSteel Prototype");
-        misc.addLookupName("Clan Endo-Steel Prototype Structure");
-        misc.addLookupName("Clan EndoSteel Prototype Structure");
-        misc.addLookupName("Clan Endo Steel Structure");
-        misc.tonnage = TONNAGE_VARIABLE;
-        misc.criticalSlots = CRITICAL_SLOTS_VARIABLE;
-        misc.hittable = false;
-        misc.spreadable = true;
-        misc.flags = misc.flags.or(F_ENDO_STEEL_PROTO);
-        misc.omniFixedOnly = true;
-        misc.bv = 0;
-        misc.rulesRefs = "224, TM";
-        misc.techAdvancement.setTechBase(TechBase.CLAN)
-              .setIntroLevel(false)
-              .setUnofficial(false)
-              .setTechRating(TechRating.F)
-              .setAvailability(AvailabilityValue.X, AvailabilityValue.E, AvailabilityValue.D, AvailabilityValue.D)
-              .setClanAdvancement(2825, 2827, 2830, DATE_NONE, DATE_NONE)
+              .setAvailability(AvailabilityValue.F, AvailabilityValue.F, AvailabilityValue.X, AvailabilityValue.X)
+              .setISAdvancement(2471, DATE_NONE, DATE_NONE, 2487, 3035)
+              .setISApproximate(true, false, false, true, true)
+              .setClanAdvancement(3045, DATE_NONE, DATE_NONE, DATE_NONE, DATE_NONE)
               .setClanApproximate(true, false, false, false, false)
+              .setPrototypeFactions(Faction.TH)
               .setPrototypeFactions(Faction.CIH)
-              .setProductionFactions(Faction.CIH);
+              .setReintroductionFactions(Faction.DC);
         return misc;
     }
 
@@ -9450,7 +9423,7 @@ public class MiscType extends EquipmentType {
         misc.setInternalName(EquipmentTypeLookup.P_TSM);
         misc.shortName = "Prototype TSM";
         misc.tonnage = 0;
-        misc.criticalSlots = 2;
+        misc.criticalSlots = 6;
         misc.hittable = false;
         misc.spreadable = true;
         misc.flags = misc.flags.or(F_TSM, F_PROTOTYPE, F_MEK_EQUIPMENT);
@@ -9459,8 +9432,8 @@ public class MiscType extends EquipmentType {
         misc.rulesRefs = "98, IO:AE";
         misc.techAdvancement.setTechBase(TechBase.IS)
               .setTechRating(TechRating.E)
-              .setAvailability(AvailabilityValue.X, AvailabilityValue.X, AvailabilityValue.D, AvailabilityValue.D)
-              .setISAdvancement(3028, 3050, 3055, DATE_NONE, DATE_NONE)
+              .setAvailability(AvailabilityValue.X, AvailabilityValue.F, AvailabilityValue.X, AvailabilityValue.X)
+              .setISAdvancement(3028, DATE_NONE, DATE_NONE, 3050)
               .setISApproximate(true, false, false, false)
               .setPrototypeFactions(Faction.CC)
               .setStaticTechLevel(SimpleTechLevel.EXPERIMENTAL);
