@@ -9335,7 +9335,7 @@ public class MiscType extends EquipmentType {
         misc.addLookupName("TSM");
         misc.addLookupName("Triple Strength Myomer");
         misc.tonnage = 0;
-        misc.criticalSlots = 6;
+        misc.criticalSlots = 4;
         misc.hittable = false;
         misc.spreadable = true;
         misc.flags = misc.flags.or(F_TSM, F_MEK_EQUIPMENT);
@@ -9393,7 +9393,7 @@ public class MiscType extends EquipmentType {
         misc.setInternalName(EquipmentTypeLookup.P_TSM);
         misc.shortName = "Prototype TSM";
         misc.tonnage = 0;
-        misc.criticalSlots = 6;
+        misc.criticalSlots = 4;
         misc.hittable = false;
         misc.spreadable = true;
         misc.flags = misc.flags.or(F_TSM, F_PROTOTYPE, F_MEK_EQUIPMENT);
@@ -9402,8 +9402,8 @@ public class MiscType extends EquipmentType {
         misc.rulesRefs = "98, IO:AE";
         misc.techAdvancement.setTechBase(TechBase.IS)
               .setTechRating(TechRating.E)
-              .setAvailability(AvailabilityValue.X, AvailabilityValue.F, AvailabilityValue.X, AvailabilityValue.X)
-              .setISAdvancement(3028, DATE_NONE, DATE_NONE, 3050)
+              .setAvailability(AvailabilityValue.X, AvailabilityValue.X, AvailabilityValue.D, AvailabilityValue.D)
+              .setISAdvancement(3028, 3050, 3055, DATE_NONE, DATE_NONE)
               .setISApproximate(true, false, false, false)
               .setPrototypeFactions(Faction.CC)
               .setStaticTechLevel(SimpleTechLevel.EXPERIMENTAL);
