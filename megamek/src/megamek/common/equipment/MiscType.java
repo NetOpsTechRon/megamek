@@ -1306,7 +1306,7 @@ public class MiscType extends EquipmentType {
             }
         } else if (hasFlag(F_ENDO_STEEL_PROTO)) {
             if (entity.isSuperHeavy()) {
-                return isClan() ? 4 : 7;
+                return isClan() ? 2 : 4;
             } else {
                 return isClan() ? 2 : 4;
             }
@@ -1541,6 +1541,7 @@ public class MiscType extends EquipmentType {
         EquipmentType.addType(MiscType.createVehicularJumpJet());
         EquipmentType.addType(MiscType.createJumpBooster());
         EquipmentType.addType(MiscType.createISEndoSteelPrototype());
+        EquipmentType.addType(MiscType.createCLEndoSteelPrototype());
         EquipmentType.addType(MiscType.createReinforcedStructure());
         EquipmentType.addType(MiscType.createISCompositeStructure());
         EquipmentType.addType(MiscType.createIndustrialStructure());
@@ -1933,15 +1934,16 @@ public class MiscType extends EquipmentType {
         misc.bv = 0;
         misc.rulesRefs = "17,XTRO:SW1";
         // Not included in IO Progression data based on original source.
-        misc.techAdvancement.setTechBase(TechBase.IS)
-              .setISAdvancement(3000, 3005, 3010, DATE_NONE)
-              .setISApproximate(true, false, false, false, false)
-              .setClanAdvancement(3000, 3005, 3010, DATE_NONE)
-              .setClanApproximate(true, false, false, false, false)
-              .setPrototypeFactions(Faction.FS)
-              .setProductionFactions(Faction.FS)
-              .setTechRating(TechRating.E)
-              .setAvailability(AvailabilityValue.X, AvailabilityValue.X, AvailabilityValue.E, AvailabilityValue.D);
+        misc.techAdvancement.setTechBase(TechBase.ALL)
+              .setISAdvancement(2464, 2471, 2500, DATE_NONE, DATE_NONE)
+              .setISApproximate(false, false, false, false, false)
+              .setClanAdvancement(2464, 2471, 2500, DATE_NONE, DATE_NONE)
+              .setClanApproximate(false, false, false, false, false)
+              .setPrototypeFactions(Faction.TH)
+              .setProductionFactions(Faction.TH)
+              .setTechRating(TechRating.D)
+              .setAvailability(AvailabilityValue.C, AvailabilityValue.C, AvailabilityValue.C, AvailabilityValue.C)
+              .setStaticTechLevel(SimpleTechLevel.INTRO);
         return misc;
     }
 
@@ -5493,8 +5495,8 @@ public class MiscType extends EquipmentType {
         misc.addLookupName("THB Bloodhound Active Probe");
         misc.addLookupName("ISTHBBloodhoundActiveProbe");
         misc.addLookupName("IS THB Bloodhound Active Probe");
-        misc.tonnage = 5;
-        misc.criticalSlots = 2;
+        misc.tonnage = 0.5;
+        misc.criticalSlots = 1;
         misc.cost = 750000;
         misc.flags = misc.flags.or(F_BAP,
                     F_BLOODHOUND,
@@ -5511,12 +5513,12 @@ public class MiscType extends EquipmentType {
         misc.bv = 25;
         // Since its Tactical Handbook Using TO Values
         misc.rulesRefs = "Unofficial";
-        misc.techAdvancement.setTechBase(TechBase.IS)
+        misc.techAdvancement.setTechBase(TechBase.ALL)
               .setIntroLevel(false)
               .setUnofficial(true)
               .setTechRating(TechRating.E)
               .setAvailability(AvailabilityValue.X, AvailabilityValue.X, AvailabilityValue.F, AvailabilityValue.E)
-              .setISAdvancement(DATE_NONE, 3058, 3082, DATE_NONE, DATE_NONE)
+              .setISAdvancement(DATE_NONE, 3045, 3082, DATE_NONE, DATE_NONE)
               .setISApproximate(false, false, false, false, false)
               .setPrototypeFactions(Faction.CS)
               .setProductionFactions(Faction.RS)
@@ -5768,8 +5770,8 @@ public class MiscType extends EquipmentType {
         misc.setInternalName("ISTHBAngelECMSuite");
         misc.addLookupName("IS THB Angel ECM Suite");
         misc.addLookupName("ISTHBAngelECM");
-        misc.tonnage = 1.5f;
-        misc.criticalSlots = 2;
+        misc.tonnage = 0.5f;
+        misc.criticalSlots = 1;
         misc.cost = 1000000;
         misc.flags = misc.flags.or(F_ECM,
                     F_ANGEL_ECM,
@@ -5790,9 +5792,9 @@ public class MiscType extends EquipmentType {
         misc.techAdvancement.setTechBase(TechBase.ALL)
               .setTechRating(TechRating.F)
               .setAvailability(AvailabilityValue.X, AvailabilityValue.X, AvailabilityValue.F, AvailabilityValue.E)
-              .setISAdvancement(3057, 3080, 3085, DATE_NONE, DATE_NONE)
+              .setISAdvancement(3045, 3080, 3085, DATE_NONE, DATE_NONE)
               .setISApproximate(false, true, false, false, false)
-              .setClanAdvancement(3058, 3080, 3085, DATE_NONE, DATE_NONE)
+              .setClanAdvancement(3045, 3080, 3085, DATE_NONE, DATE_NONE)
               .setClanApproximate(false, true, false, false, false)
               .setPrototypeFactions(Faction.DC, Faction.CNC)
               .setProductionFactions(Faction.DC)
@@ -9133,11 +9135,40 @@ public class MiscType extends EquipmentType {
               .setIntroLevel(false)
               .setUnofficial(false)
               .setTechRating(TechRating.E)
-              .setAvailability(AvailabilityValue.F, AvailabilityValue.F, AvailabilityValue.X, AvailabilityValue.X)
-              .setISAdvancement(2471, DATE_NONE, DATE_NONE, 2487, 3035)
-              .setISApproximate(true, false, false, true, true)
+              .setAvailability(AvailabilityValue.D, AvailabilityValue.F, AvailabilityValue.E, AvailabilityValue.D)
+              .setISAdvancement(2480, 2487, 3040, 2850, 3035)
+              .setISApproximate(true, false, false, false, false)
               .setPrototypeFactions(Faction.TH)
               .setReintroductionFactions(Faction.DC);
+        return misc;
+    }
+
+    public static StructureType createCLEndoSteelPrototype() {
+        StructureType misc = new StructureType(T_STRUCTURE_ENDO_PROTOTYPE);
+        misc.name = EquipmentType.getStructureTypeName(T_STRUCTURE_ENDO_PROTOTYPE);
+        misc.setInternalName(EquipmentType.getStructureTypeName(T_STRUCTURE_ENDO_PROTOTYPE, true));
+        misc.addLookupName("Clan Endo-Steel Prototype");
+        misc.addLookupName("Clan EndoSteel Prototype");
+        misc.addLookupName("Clan Endo-Steel Prototype Structure");
+        misc.addLookupName("Clan EndoSteel Prototype Structure");
+        misc.addLookupName("Clan Endo Steel Structure");
+        misc.tonnage = TONNAGE_VARIABLE;
+        misc.criticalSlots = CRITICAL_SLOTS_VARIABLE;
+        misc.hittable = false;
+        misc.spreadable = true;
+        misc.flags = misc.flags.or(F_ENDO_STEEL_PROTO);
+        misc.omniFixedOnly = true;
+        misc.bv = 0;
+        misc.rulesRefs = "224, TM";
+        misc.techAdvancement.setTechBase(TechBase.CLAN)
+              .setIntroLevel(false)
+              .setUnofficial(false)
+              .setTechRating(TechRating.F)
+              .setAvailability(AvailabilityValue.X, AvailabilityValue.E, AvailabilityValue.D, AvailabilityValue.D)
+              .setClanAdvancement(2825, 2827, 2830, DATE_NONE, DATE_NONE)
+              .setClanApproximate(true, false, false, false, false)
+              .setPrototypeFactions(Faction.CIH)
+              .setProductionFactions(Faction.CIH);
         return misc;
     }
 
@@ -9169,6 +9200,7 @@ public class MiscType extends EquipmentType {
               .setProductionFactions(Faction.CIH);
         return misc;
     }
+
 
     public static StructureType createISCompositeStructure() {
         StructureType misc = new StructureType(T_STRUCTURE_COMPOSITE);

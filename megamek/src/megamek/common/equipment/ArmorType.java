@@ -491,8 +491,9 @@ public class ArmorType extends MiscType {
         ArmorType armor = new ArmorType();
 
         armor.name = "Ferro-Fibrous Prototype";
-        armor.setInternalName("IS Ferro-Fibrous Prototype");
+        armor.setInternalName("Ferro-Fibrous Prototype");
         armor.addLookupName("IS Ferro-Fibrous Armor Prototype");
+        armor.addLookupName("Clan Ferro-Fibrous Armor Prototype");
         armor.cost = 60000.0;
         armor.criticalSlots = CRITICAL_SLOTS_VARIABLE;
         armor.tankSlots = 3;
@@ -502,14 +503,19 @@ public class ArmorType extends MiscType {
         armor.flags = armor.flags.or(F_FERRO_FIBROUS_PROTO).or(F_MEK_EQUIPMENT).or(F_TANK_EQUIPMENT)
               .or(F_VTOL_EQUIPMENT);
         armor.rulesRefs = "66, IO:AE";
-        armor.techAdvancement.setTechBase(TechBase.IS).setTechRating(TechRating.E)
-              .setAvailability(AvailabilityValue.F, AvailabilityValue.F, AvailabilityValue.X, AvailabilityValue.X)
-              .setISAdvancement(2557, DATE_NONE, DATE_NONE, 2571, 3034)
-              .setISApproximate(true, false, false, true, true).setPrototypeFactions(Faction.TH)
-              .setReintroductionFactions(Faction.LC, Faction.DC);
+        armor.techAdvancement.setTechBase(TechBase.ALL)
+              .setTechRating(TechRating.E)
+              .setAvailability(AvailabilityValue.D, AvailabilityValue.F, AvailabilityValue.D, AvailabilityValue.C)
+              .setISAdvancement(2557, 2571, 3055, 2810, 3040)
+              .setISApproximate(false, false, false, true, false)
+              .setClanAdvancement(2557, 2571, 2820, DATE_NONE, DATE_NONE)
+              .setClanApproximate(false, false, true, false, false)
+              .setPrototypeFactions(Faction.TH)
+              .setProductionFactions(Faction.TH)
+              .setReintroductionFactions(Faction.DC);
 
         armor.armorType = T_ARMOR_FERRO_FIBROUS_PROTO;
-        armor.pptMultiplier = 1.12;
+        armor.pptMultiplier = 1.2;
 
         return armor;
     }
