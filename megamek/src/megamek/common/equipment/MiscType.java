@@ -1305,7 +1305,11 @@ public class MiscType extends EquipmentType {
                 return isClan() ? 7 : 14;
             }
         } else if (hasFlag(F_ENDO_STEEL_PROTO)) {
-            return entity.isSuperHeavy() ? 4 : 7;
+            if (entity.isSuperHeavy()) {
+                return isClan() ? 1 : 2;
+            } else {
+                return isClan() ? 1 : 2;
+            }
         } else if (hasFlag(F_ENDO_COMPOSITE)) {
             if (entity.isSuperHeavy()) {
                 return isClan() ? 2 : 4;
@@ -1537,6 +1541,7 @@ public class MiscType extends EquipmentType {
         EquipmentType.addType(MiscType.createVehicularJumpJet());
         EquipmentType.addType(MiscType.createJumpBooster());
         EquipmentType.addType(MiscType.createISEndoSteelPrototype());
+        EquipmentType.addType(MiscType.createCLEndoSteelPrototype());
         EquipmentType.addType(MiscType.createReinforcedStructure());
         EquipmentType.addType(MiscType.createISCompositeStructure());
         EquipmentType.addType(MiscType.createIndustrialStructure());
@@ -9130,7 +9135,7 @@ public class MiscType extends EquipmentType {
               .setIntroLevel(false)
               .setUnofficial(false)
               .setTechRating(TechRating.E)
-              .setAvailability(AvailabilityValue.F, AvailabilityValue.F, AvailabilityValue.X, AvailabilityValue.X)
+              .setAvailability(AvailabilityValue.F, AvailabilityValue.F, AvailabilityValue.F, AvailabilityValue.F)
               .setISAdvancement(2471, DATE_NONE, DATE_NONE, 2487, 3035)
               .setISApproximate(true, false, false, true, true)
               .setPrototypeFactions(Faction.TH)
@@ -9164,6 +9169,35 @@ public class MiscType extends EquipmentType {
               .setClanApproximate(true, false, false, false, false)
               .setPrototypeFactions(Faction.CIH)
               .setProductionFactions(Faction.CIH);
+        return misc;
+    }
+
+    public static StructureType createCLEndoSteelPrototype() {
+        StructureType misc = new StructureType(T_STRUCTURE_ENDO_PROTOTYPE);
+
+        misc.name = EquipmentType.getStructureTypeName(T_STRUCTURE_ENDO_PROTOTYPE);
+        misc.setInternalName(EquipmentType.getStructureTypeName(T_STRUCTURE_ENDO_PROTOTYPE, true));
+        misc.addLookupName("Clan Endo Steel Prototype");
+        misc.addLookupName("Clan Endo-Steel Prototype");
+        misc.addLookupName("Clan Endo Steel Prototype Structure");
+        misc.addLookupName("Clan Endo-Steel Prototype Structure");
+        misc.tonnage = TONNAGE_VARIABLE;
+        misc.criticalSlots = CRITICAL_SLOTS_VARIABLE;
+        misc.hittable = false;
+        misc.spreadable = true;
+        misc.flags = misc.flags.or(F_ENDO_STEEL_PROTO);
+        misc.omniFixedOnly = true;
+        misc.bv = 0;
+        misc.rulesRefs = "65, IO:AE";
+        misc.techAdvancement.setTechBase(TechBase.CLAN)
+              .setIntroLevel(false)
+              .setUnofficial(false)
+              .setTechRating(TechRating.E)
+              .setAvailability(AvailabilityValue.F, AvailabilityValue.F, AvailabilityValue.F, AvailabilityValue.F)
+              .setClanAdvancement(2471, DATE_NONE, DATE_NONE, 2487, 3035)
+              .setClanApproximate(true, false, false, true, true)
+              .setPrototypeFactions(Faction.TH)
+              .setReintroductionFactions(Faction.CSF);
         return misc;
     }
 
