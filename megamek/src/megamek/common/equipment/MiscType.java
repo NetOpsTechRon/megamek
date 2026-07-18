@@ -1305,11 +1305,7 @@ public class MiscType extends EquipmentType {
                 return isClan() ? 7 : 14;
             }
         } else if (hasFlag(F_ENDO_STEEL_PROTO)) {
-            if (entity.isSuperHeavy()) {
-                return isClan() ? 2 : 4;
-            } else {
-                return isClan() ? 2 : 4;
-            }
+            return entity.isSuperHeavy() ? 4 : 7;
         } else if (hasFlag(F_ENDO_COMPOSITE)) {
             if (entity.isSuperHeavy()) {
                 return isClan() ? 2 : 4;
@@ -9170,7 +9166,6 @@ public class MiscType extends EquipmentType {
               .setProductionFactions(Faction.CIH);
         return misc;
     }
-
 
     public static StructureType createISCompositeStructure() {
         StructureType misc = new StructureType(T_STRUCTURE_COMPOSITE);
