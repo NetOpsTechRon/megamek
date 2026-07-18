@@ -515,7 +515,7 @@ public class ArmorType extends MiscType {
               .setReintroductionFactions(Faction.DC);
 
         armor.armorType = T_ARMOR_FERRO_FIBROUS_PROTO;
-        armor.pptMultiplier = 1.2;
+        armor.pptMultiplier = 1.25;
 
         return armor;
     }
