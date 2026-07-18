@@ -56,7 +56,7 @@ public class ISTHBUAC20 extends UACWeapon {
         name = "Ultra AC/20 (THB)";
         setInternalName("ISUltraAC20 (THB)");
         addLookupName("IS Ultra AC/20 (THB)");
-        heat = 10;
+        heat = 8;
         damage = 20;
         rackSize = 20;
         ammoType = AmmoType.AmmoTypeEnum.AC_ULTRA_THB;
@@ -64,10 +64,10 @@ public class ISTHBUAC20 extends UACWeapon {
         mediumRange = 8;
         longRange = 12;
         extremeRange = 16;
-        tonnage = 15.0;
-        criticalSlots = 11;
+        tonnage = 14.0;
+        criticalSlots = 10;
         bv = 335;
-        cost = 600000;
+        cost = 480000;
         // Since this are the Tactical Handbook Weapons I'm using the TM Stats.
         rulesRefs = "THB (Unofficial)";
         techAdvancement.setTechBase(TechBase.IS)

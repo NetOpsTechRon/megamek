@@ -64,10 +64,10 @@ public class ISTHBUAC10 extends UACWeapon {
         this.mediumRange = 14;
         this.longRange = 21;
         this.extremeRange = 28;
-        this.tonnage = 13.0;
+        this.tonnage = 12.0;
         this.criticalSlots = 7;
         this.bv = 245;
-        this.cost = 400000;
+        this.cost = 320000;
         // Since this are the Tactical Handbook Weapons I'm using the TM Stats.
         rulesRefs = "THB (Unofficial)";
         techAdvancement.setTechBase(TechBase.IS)

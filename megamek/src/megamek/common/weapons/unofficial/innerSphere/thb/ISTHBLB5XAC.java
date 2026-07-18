@@ -60,19 +60,19 @@ public class ISTHBLB5XAC extends LBXACWeapon {
         this.damage = 5;
         this.rackSize = 5;
         this.ammoType = AmmoType.AmmoTypeEnum.AC_LBX_THB;
-        this.minimumRange = 3;
+        this.minimumRange = 0;
         this.shortRange = 8;
         this.mediumRange = 15;
         this.longRange = 22;
         this.extremeRange = 30;
-        this.tonnage = 8.0;
-        this.criticalSlots = 6;
+        this.tonnage = 7.0;
+        this.criticalSlots = 5;
         this.shortAV = getBaseAeroDamage();
         this.medAV = this.shortAV;
         this.longAV = this.shortAV;
         this.extAV = this.shortAV;
         this.bv = 85;
-        this.cost = 300000;
+        this.cost = 250000;
         // Since this are the Tactical Handbook Weapons I'm using the TM Stats.
         rulesRefs = "THB (Unofficial)";
         techAdvancement.setTechBase(TechBase.IS)

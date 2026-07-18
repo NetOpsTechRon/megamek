@@ -5497,7 +5497,7 @@ public class MiscType extends EquipmentType {
         misc.addLookupName("IS THB Bloodhound Active Probe");
         misc.tonnage = 0.25;
         misc.criticalSlots = 1;
-        misc.cost = 750000;
+        misc.cost = 200000;
         misc.flags = misc.flags.or(F_BAP,
                     F_BLOODHOUND,
                     F_MEK_EQUIPMENT,
@@ -5772,7 +5772,7 @@ public class MiscType extends EquipmentType {
         misc.addLookupName("ISTHBAngelECM");
         misc.tonnage = 0.25f;
         misc.criticalSlots = 1;
-        misc.cost = 1000000;
+        misc.cost = 200000;
         misc.flags = misc.flags.or(F_ECM,
                     F_ANGEL_ECM,
                     F_MEK_EQUIPMENT,

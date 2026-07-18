@@ -65,10 +65,10 @@ public class ISAC10i extends ACWeapon {
         mediumRange = 15;
         longRange = 20;
         extremeRange = 28;
-        tonnage = 11.0;
+        tonnage = 10.0;
         criticalSlots = 7;
         bv = 167;
-        cost = 410000;
+        cost = 200000;
         explosive = false;
         shortAV = 10;
         medAV = 10;

@@ -61,17 +61,17 @@ public class ISTHBLB20XAC extends LBXACWeapon {
         rackSize = 20;
         ammoType = AmmoType.AmmoTypeEnum.AC_LBX_THB;
         shortRange = 4;
-        mediumRange = 7;
+        mediumRange = 8;
         longRange = 12;
         extremeRange = 14;
-        tonnage = 14.0;
+        tonnage = 12.0;
         criticalSlots = 10;
         shortAV = getBaseAeroDamage();
         medAV = shortAV;
         longAV = shortAV;
         extAV = shortAV;
         bv = 204;
-        cost = 700000;
+        cost = 600000;
         // Since this are the Tactical Handbook Weapons I'm using the TM Stats.
         rulesRefs = "THB (Unofficial)";
         techAdvancement.setTechBase(TechBase.IS)
