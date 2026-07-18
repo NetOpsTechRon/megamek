@@ -9118,10 +9118,10 @@ public class MiscType extends EquipmentType {
 
         misc.name = EquipmentType.getStructureTypeName(T_STRUCTURE_ENDO_PROTOTYPE);
         misc.setInternalName(EquipmentType.getStructureTypeName(T_STRUCTURE_ENDO_PROTOTYPE, false));
-        misc.addLookupName("Endo Steel Prototype");
-        misc.addLookupName("Endo-Steel Prototype");
-        misc.addLookupName("Endo Steel Prototype Structure");
-        misc.addLookupName("Endo-Steel Prototype Structure");
+        misc.addLookupName("IS Endo Steel Prototype");
+        misc.addLookupName("IS Endo-Steel Prototype");
+        misc.addLookupName("IS Endo Steel Prototype Structure");
+        misc.addLookupName("IS Endo-Steel Prototype Structure");
         misc.tonnage = TONNAGE_VARIABLE;
         misc.criticalSlots = CRITICAL_SLOTS_VARIABLE;
         misc.hittable = false;
@@ -9130,17 +9130,14 @@ public class MiscType extends EquipmentType {
         misc.omniFixedOnly = true;
         misc.bv = 0;
         misc.rulesRefs = "65, IO:AE";
-        misc.techAdvancement.setTechBase(TechBase.ALL)
+        misc.techAdvancement.setTechBase(TechBase.IS)
               .setIntroLevel(false)
               .setUnofficial(false)
               .setTechRating(TechRating.E)
               .setAvailability(AvailabilityValue.F, AvailabilityValue.F, AvailabilityValue.X, AvailabilityValue.X)
               .setISAdvancement(2471, DATE_NONE, DATE_NONE, 2487, 3035)
               .setISApproximate(true, false, false, true, true)
-              .setClanAdvancement(3045, DATE_NONE, DATE_NONE, DATE_NONE, DATE_NONE)
-              .setClanApproximate(true, false, false, false, false)
               .setPrototypeFactions(Faction.TH)
-              .setPrototypeFactions(Faction.CIH)
               .setReintroductionFactions(Faction.DC);
         return misc;
     }
