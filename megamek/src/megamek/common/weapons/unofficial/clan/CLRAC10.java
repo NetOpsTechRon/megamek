@@ -67,7 +67,7 @@ public class CLRAC10 extends RACWeapon {
         this.tonnage = 14.0;
         this.criticalSlots = 7;
         this.bv = 617;
-        this.cost = 640000;
+        this.cost = 450000;
         rulesRefs = "Unofficial";
         flags = flags.andNot(F_PROTO_WEAPON);
         techAdvancement.setTechBase(TechBase.CLAN)
